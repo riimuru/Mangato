@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+
 import '../models/home_manga_module.dart';
 import '../widgets/manga_info_widget.dart';
 import '../models/manga_info_module.dart';
+import '../constants.dart';
 
+@immutable
 class MangaInfo extends StatelessWidget {
   final MangaModule manga;
 
-  MangaInfo(this.manga);
+  const MangaInfo(this.manga);
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +28,7 @@ class MangaInfo extends StatelessWidget {
                   child: Text(
                     "Loading...",
                     style: TextStyle(
-                      color: Color(0xFFFFFFFF),
+                      color: white,
                       fontSize: 20,
                     ),
                   ),

@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:shonen_jump/models/manga_authors_module.dart';
-import 'package:shonen_jump/models/manga_chapters_module.dart';
-import 'package:shonen_jump/models/manga_genres_module.dart';
 import 'dart:convert';
 
 import '../models/home_manga_module.dart';
 import '../models/manga_info_module.dart';
+import '../models/manga_authors_module.dart';
+import '../models/manga_chapters_module.dart';
+import '../models/manga_genres_module.dart';
+import '../models/manga_search_module.dart';
 
 class DataSource {
   Future<List<MangaModule>> getLatestManga() async {
@@ -81,13 +82,13 @@ class DataSource {
 
     var jsonData = json.decode(data.body)[0];
 
-    final String title = jsonData["title"];
-    final String img = jsonData["img"];
-    final String alt = jsonData["alt"];
-    final String status = jsonData["status"];
-    final String lastUpdated = jsonData["updated"];
-    final String views = jsonData["views"];
-    final String synopsis = jsonData["synopsis"];
+    final title = jsonData["title"];
+    final img = jsonData["img"];
+    final alt = jsonData["alt"];
+    final status = jsonData["status"];
+    final lastUpdated = jsonData["lastUpdated"];
+    final views = jsonData["views"];
+    final synopsis = jsonData["synopsis"];
 
     List<Authors> authors = [];
     for (var data in jsonData["authors"]) {
@@ -133,5 +134,49 @@ class DataSource {
     );
 
     return manga;
+  }
+
+  Future<SearchModule> getResults(String query) async {
+    var url =
+        Uri.parse('https://shonen-jump.herokuapp.com/manga_search?find=$query');
+
+    var data = await http.get(url);
+
+    var jsonData = json.decode(data.body)[0];
+
+    var totalStoriesFound = jsonData["totalStoriesFound"].toString();
+    var totalPages = jsonData["totalPages"].toString();
+
+    List<SearchedChapters> results = [];
+    for (var data in jsonData["data"]) {
+      List<latestChapters> chapters = [];
+
+      for (var chap in data["latestChapters"]) {
+        latestChapters chapter = latestChapters(
+          chapterTitle: chap["chapterTitle"],
+          chapterLink: chap["chapterLink"],
+        );
+
+        chapters.add(chapter);
+      }
+
+      SearchedChapters result = SearchedChapters(
+        title: data["title"],
+        authors: data["authors"],
+        lastUpdated: data["lastUpdated"],
+        views: data["views"],
+        img: data["img"],
+        src: data["src"],
+        chapters: chapters,
+      );
+      results.add(result);
+    }
+    SearchModule searchResult = SearchModule(
+      query: query,
+      totalStoriesFound: totalStoriesFound,
+      totalPages: totalPages,
+      mangas: results,
+    );
+    return searchResult;
   }
 }

@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+
 import '../main.dart';
 import '../widgets/recent_chapters_widget.dart';
 import '../src/data_source.dart';
 import '../widgets/popular_manga_widget.dart';
 import '../screens/favorite_screen.dart';
 import '../screens/search_screen.dart';
-import '../models/home_manga_module.dart';
+import '../constants.dart';
+import './search_screen.dart';
 
-var dataSource = new DataSource();
+var dataSource = DataSource();
 
-class MangaState extends State<Manga> {
+class ShonenJumpState extends State<ShonenJump> {
+  void openSearch() async {
+    await showSearch(context: context, delegate: DataSearch());
+  }
+
   @override
   Widget build(_) {
     return Scaffold(
@@ -21,14 +27,9 @@ class MangaState extends State<Manga> {
           IconButton(
             icon: const Icon(
               Icons.search,
-              color: Color(0xFFFFFFFF),
+              color: white,
             ),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) => Search(),
-              ),
-            ),
+            onPressed: () => openSearch(),
             iconSize: 27.0,
             enableFeedback: true,
             splashRadius: 15.0,
@@ -62,7 +63,7 @@ class MangaState extends State<Manga> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
-                  color: Color(0xFFFFFFFF),
+                  color: white,
                 ),
                 textAlign: TextAlign.start,
               ),
@@ -75,8 +76,14 @@ class MangaState extends State<Manga> {
                 builder: (_, AsyncSnapshot snapshot) {
                   if (snapshot.data == null) {
                     return Container(
-                      child: Center(
-                        child: Text("Loading..."),
+                      child: const Center(
+                        child: Text(
+                          "Loading...",
+                          style: TextStyle(
+                            color: white,
+                            fontSize: 20,
+                          ),
+                        ),
                       ),
                     );
                   } else {
@@ -98,7 +105,7 @@ class MangaState extends State<Manga> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
-                  color: Color(0xFFFFFFFF),
+                  color: white,
                 ),
                 textAlign: TextAlign.start,
               ),
@@ -111,8 +118,14 @@ class MangaState extends State<Manga> {
                   builder: (_, AsyncSnapshot snapshot) {
                     if (snapshot.data == null) {
                       return Container(
-                        child: Center(
-                          child: Text("Loading..."),
+                        child: const Center(
+                          child: Text(
+                            "Loading...",
+                            style: TextStyle(
+                              color: white,
+                              fontSize: 20,
+                            ),
+                          ),
                         ),
                       );
                     } else {

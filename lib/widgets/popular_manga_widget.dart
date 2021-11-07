@@ -1,7 +1,9 @@
-import '../models/home_manga_module.dart';
 import 'package:flutter/material.dart';
+
+import '../models/home_manga_module.dart';
 import '../screens/manga_info_screen.dart';
 import '../src/data_source.dart';
+import '../constants.dart';
 
 DataSource dataSource = DataSource();
 
@@ -52,7 +54,7 @@ Widget popularMangaCard({
                     title: Text(
                       item.title,
                       style: const TextStyle(
-                        color: Color(0xFFFFFFFF),
+                        color: white,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -62,7 +64,7 @@ Widget popularMangaCard({
                     subtitle: Text(
                       item.synopsis,
                       style: const TextStyle(
-                        color: Color(0xFFFFFFFF),
+                        color: white,
                       ),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
@@ -77,7 +79,7 @@ Widget popularMangaCard({
                   //       Text(
                   //         item.title,
                   //         style: const TextStyle(
-                  //           color: Color(0xFFFFFFFF),
+                  //           color: white,
                   //           fontSize: 16,
                   //           fontWeight: FontWeight.bold,
                   //         ),
@@ -92,7 +94,7 @@ Widget popularMangaCard({
                   //         child: Text(
                   //           item.synopsis,
                   //           style: const TextStyle(
-                  //             color: Color(0xFFFFFFFF),
+                  //             color: white,
                   //           ),
                   //           maxLines: 3,
                   //           overflow: TextOverflow.ellipsis,

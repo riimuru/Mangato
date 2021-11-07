@@ -4,13 +4,13 @@ import './screens/home_screen.dart';
 void main() => runApp(
       MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Manga(),
+        home: ShonenJump(),
       ),
     );
 
-class Manga extends StatefulWidget {
+class ShonenJump extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return MangaState();
+    return ShonenJumpState();
   }
 }
