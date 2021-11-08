@@ -1,9 +1,9 @@
 class MangaModule {
   final int index;
   final String title;
-  String chapter = '';
+  String chapter = "";
   final String img;
-  String synopsis = '';
+  String synopsis = "";
   final String views;
   final String src;
 

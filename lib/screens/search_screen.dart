@@ -70,8 +70,60 @@ class DataSearch extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    // TODO: implement buildResults
-    throw UnimplementedError();
+    return Container(
+      child: FutureBuilder(
+        future: data.getResults(query),
+        builder: (_, AsyncSnapshot snapshot) {
+          if (snapshot.data == null) {
+            return Container(
+              child: const Center(
+                child: Text(
+                  "Loading...",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+            );
+          } else {
+            return ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: snapshot.data.mangas.length,
+              itemBuilder: (context, int index) => ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MangaInfo(
+                        MangaModule(
+                          index: index,
+                          title: snapshot.data.mangas[index].title,
+                          img: snapshot.data.mangas[index].img,
+                          src: snapshot.data.mangas[index].src,
+                          views: snapshot.data.mangas[index].views,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                leading: const Icon(
+                  Icons.book,
+                  color: Colors.white,
+                ),
+                title: Text(
+                  snapshot.data.mangas[index].title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 
   @override

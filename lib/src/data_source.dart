@@ -4,9 +4,6 @@ import 'dart:convert';
 
 import '../models/home_manga_module.dart';
 import '../models/manga_info_module.dart';
-import '../models/manga_authors_module.dart';
-import '../models/manga_chapters_module.dart';
-import '../models/manga_genres_module.dart';
 import '../models/manga_search_module.dart';
 
 class DataSource {
@@ -36,7 +33,7 @@ class DataSource {
   Future<List<MangaModule>> getPopularManga() async {
     try {
       var url = Uri.parse(
-          "https://shonen-jump.herokuapp.com/manga_list?type=topview");
+          "https://shonen-jump.herokuapp.com/manga_list?orby=topview");
       var data = await http.get(url);
 
       var jsonData = json.decode(data.body)[0]["data"];
@@ -89,7 +86,8 @@ class DataSource {
     final lastUpdated = jsonData["lastUpdated"];
     final views = jsonData["views"];
     final synopsis = jsonData["synopsis"];
-
+    final rating = jsonData["rating"];
+    final totalVotes = jsonData["totalVotes"];
     List<Authors> authors = [];
     for (var data in jsonData["authors"]) {
       Authors author = Authors(
@@ -124,6 +122,8 @@ class DataSource {
       synopsis: synopsis,
       alt: alt,
       lastUpdated: lastUpdated,
+      rating: rating,
+      totalVoted: totalVotes,
       status: status,
       genres: genres,
       authors: authors,
@@ -149,34 +149,46 @@ class DataSource {
 
     List<SearchedChapters> results = [];
     for (var data in jsonData["data"]) {
-      List<latestChapters> chapters = [];
-
-      for (var chap in data["latestChapters"]) {
-        latestChapters chapter = latestChapters(
-          chapterTitle: chap["chapterTitle"],
-          chapterLink: chap["chapterLink"],
-        );
-
-        chapters.add(chapter);
-      }
-
       SearchedChapters result = SearchedChapters(
         title: data["title"],
+        chapterTitle: data["chapter"],
         authors: data["authors"],
-        lastUpdated: data["lastUpdated"],
+        updatedDate: data["uploadedDate"],
         views: data["views"],
         img: data["img"],
         src: data["src"],
-        chapters: chapters,
+        rating: data["rating"],
+        synopsis: data["synopsis"],
       );
       results.add(result);
     }
     SearchModule searchResult = SearchModule(
       query: query,
-      totalStoriesFound: totalStoriesFound,
-      totalPages: totalPages,
       mangas: results,
     );
     return searchResult;
+  }
+
+  Future<List<ChapterPages>> getChapterPages(String chapterUrl) async {
+    var headers = {
+      "url": chapterUrl,
+    };
+    var url = Uri.parse("https://shonen-jump.herokuapp.com/read_manga");
+
+    var data = await http.get(url, headers: headers);
+
+    var jsonData = json.decode(data.body);
+
+    List<ChapterPages> pages = [];
+
+    for (var data in jsonData) {
+      ChapterPages page = ChapterPages(
+        chapterPageTitle: data["pageTitle"],
+        img: data["img"],
+      );
+      pages.add(page);
+    }
+
+    return pages;
   }
 }

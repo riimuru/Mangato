@@ -6,7 +6,7 @@ import '../src/data_source.dart';
 import '../widgets/popular_manga_widget.dart';
 import '../screens/favorite_screen.dart';
 import '../screens/search_screen.dart';
-import '../constants.dart';
+import '../utils/constants.dart';
 import './search_screen.dart';
 
 var dataSource = DataSource();

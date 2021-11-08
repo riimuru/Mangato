@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../models/manga_info_module.dart';
 import '../src/data_source.dart';
-import '../constants.dart';
-import '../widgets/poster.dart';
-import '../widgets/synposis.dart';
+import '../utils/constants.dart';
+import '../custom/star_rating.dart';
+import './chapters.dart';
 
 DataSource dataSource = DataSource();
 
@@ -12,213 +12,343 @@ Widget mangaInfoWidget({
   required MangaInfoModule manga,
   required BuildContext context,
 }) {
-  List<Widget> _buildCategoryChips(TextTheme textTheme) {
-    return manga.genres.map((genres) {
-      return Padding(
-        padding: const EdgeInsets.only(right: 8.0),
-        child: Chip(
-          label: Text(genres.genre),
-          labelStyle: textTheme.caption,
-          backgroundColor: Colors.black12,
-        ),
-      );
-    }).toList();
-  }
-
+  final parentHeight = MediaQuery.of(context).size.height;
+  final appBarHeight = parentHeight / 2.5;
+  final thumbHeight = appBarHeight / 1.5;
   var textTheme = Theme.of(context).textTheme;
 
-  var movieInformation = Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        manga.title,
-        style: TextStyle(color: Colors.white),
-      ),
-      SizedBox(height: 8.0),
-      SizedBox(height: 12.0),
-      Row(children: _buildCategoryChips(textTheme)),
-    ],
-  );
-
-  return SingleChildScrollView(
-    physics: const BouncingScrollPhysics(),
-    child: Column(
-      children: <Widget>[
-        Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 140.0),
-            ),
-            Positioned(
-              bottom: 0.0,
-              left: 16.0,
-              right: 16.0,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Poster(
-                    manga.img,
-                    height: 180.0,
-                  ),
-                  SizedBox(width: 16.0),
-                  Expanded(child: movieInformation),
-                ],
+  return Scaffold(
+    backgroundColor: Colors.black12,
+    body: SafeArea(
+      child: Container(
+        height: MediaQuery.of(context).size.height,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Container(
+                width: double.infinity,
+                height: 300,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      child: Image.network(
+                        'https://wallpaperaccess.com/full/639663.jpg',
+                        fit: BoxFit.cover,
+                        height: 200,
+                        width: MediaQuery.of(context).size.width,
+                      ),
+                    ),
+                    Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.1),
+                      ),
+                    ),
+                    Positioned(
+                      top: 100,
+                      left: 170,
+                      width: MediaQuery.of(context).size.width / 1.75,
+                      child: Text(
+                        manga.title,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: true,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 23,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 100,
+                      left: 10,
+                      child: Image.network(
+                        manga.img,
+                        fit: BoxFit.cover,
+                        height: 200,
+                        width: 150,
+                      ),
+                    ),
+                    Positioned(
+                      top: 200,
+                      left: 155,
+                      width: MediaQuery.of(context).size.width / 1.75,
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.remove_red_eye,
+                          color: Colors.white,
+                        ),
+                        title: Transform.translate(
+                          child: Text(
+                            manga.views,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: Constant.fontRegular,
+                            ),
+                          ),
+                          offset: const Offset(-25, 0),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                        top: 240,
+                        left: 162,
+                        width: MediaQuery.of(context).size.width / 1.75,
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          child: manga.rating != ''
+                              ? StarRating(
+                                  color: Theme.of(context).primaryColor,
+                                  rating: double.parse(manga.rating),
+                                  starCount: 5,
+                                )
+                              : Container(),
+                        )),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Container(
+                padding: const EdgeInsets.only(left: 4.0, right: 4.0),
+                height: 50.0,
+                child: ListView(
+                  physics: const BouncingScrollPhysics(),
+                  scrollDirection: Axis.horizontal,
+                  children: manga.genres
+                      .map<Widget>(
+                        (g) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Chip(
+                            labelPadding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            label: Text(
+                              g.genre,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: Constant.fontMedium,
+                              ),
+                            ),
+                            backgroundColor: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+              Container(
+                alignment: Alignment.bottomLeft,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 2.0,
+                ),
+                child: Text(
+                  "Description: ",
+                  style: TextStyle(
+                    fontFamily: Constant.fontRegular,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              (() {
+                if (manga.authors.isNotEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          'Authors -',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: Constant.fontRegular,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Text(
+                            manga.authors
+                                .map<String>((e) => e.authorName)
+                                .join(', '),
+                            style: TextStyle(
+                                fontFamily: Constant.fontRegular,
+                                color: Colors.grey[500]),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return Container();
+                }
+                // your code here
+              }()),
+              (() {
+                if (manga.status.isNotEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(8.0),
+                    alignment: FractionalOffset.centerLeft,
+                    child: Wrap(
+                      children: <Widget>[
+                        Text(
+                          'Status -',
+                          style: TextStyle(
+                            fontFamily: Constant.fontRegular,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Text(
+                            manga.status,
+                            style: TextStyle(
+                                fontFamily: Constant.fontRegular,
+                                color: Colors.grey[500]),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return Container();
+                }
+              }()),
+              (() {
+                if (manga.lastUpdated.isNotEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          'Last Updated -',
+                          style: TextStyle(
+                            fontFamily: Constant.fontRegular,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Text(
+                            manga.lastUpdated,
+                            style: TextStyle(
+                                fontFamily: Constant.fontRegular,
+                                color: Colors.grey[500]),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return Container();
+                }
+              }()),
+              (() {
+                if (manga.alt.isNotEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(8.0),
+                    alignment: FractionalOffset.centerLeft,
+                    child: Wrap(
+                      children: <Widget>[
+                        Text(
+                          'Alternate Name(s) -',
+                          style: TextStyle(
+                            fontFamily: Constant.fontRegular,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Wrap(
+                            alignment: WrapAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                manga.alt,
+                                style: TextStyle(
+                                    fontFamily: Constant.fontRegular,
+                                    color: Colors.grey[500]),
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  );
+                } else {
+                  return Container();
+                }
+              }()),
+              const SizedBox(
+                height: 55,
+              )
+            ],
+          ),
         ),
-        Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Storyline(manga.synopsis),
-        ),
-        // Container(
-        //   width: double.infinity,
-        //   child: Center(
-        //     child: Row(
-        //       children: [
-        //         Flexible(
-        //           child: Container(
-        //             child: Image.network(manga.img),
-        //           ),
-        //         ),
-        //         Flexible(
-        //           child: Column(
-        //             children: [
-        //               Container(
-        //                 alignment: Alignment.centerLeft,
-        //                 margin: const EdgeInsets.fromLTRB(50, 0, 0, 0),
-        //                 child: Text(
-        //                   manga.title,
-        //                   style: const TextStyle(
-        //                     color: white,
-        //                     fontSize: 35,
-        //                     fontWeight: FontWeight.bold,
-        //                   ),
-        //                 ),
-        //               ),
-        //               Container(
-        //                 alignment: Alignment.centerLeft,
-        //                 margin: const EdgeInsets.fromLTRB(50, 0, 0, 0),
-        //                 child: Text(
-        //                   manga.alt,
-        //                   style: const TextStyle(
-        //                     color: white,
-        //                     fontSize: 15,
-        //                   ),
-        //                 ),
-        //               ),
-        //               const SizedBox(
-        //                 height: 30,
-        //               ),
-        //               Container(
-        //                 margin: const EdgeInsets.fromLTRB(50, 0, 0, 0),
-        //                 child: Row(
-        //                   children: [
-        //                     Container(
-        //                       child: const Text(
-        //                         "Author(s): ",
-        //                         style: TextStyle(
-        //                           color: white,
-        //                           fontSize: 20,
-        //                         ),
-        //                       ),
-        //                     ),
-        //                     Expanded(
-        //                       child: ListView.builder(
-        //                           shrinkWrap: true,
-        //                           physics:
-        //                               const NeverScrollableScrollPhysics(),
-        //                           itemCount: manga.authors.length,
-        //                           itemBuilder: (_, index) {
-        //                             return Text(
-        //                               manga.authors[index].authorName,
-        //                               style: const TextStyle(
-        //                                 color: white,
-        //                                 fontSize: 20,
-        //                               ),
-        //                             );
-        //                           }),
-        //                     ),
-        //                   ],
-        //                 ),
-        //               ),
-        //               Container(
-        //                 alignment: Alignment.centerLeft,
-        //                 margin: const EdgeInsets.fromLTRB(50, 0, 0, 0),
-        //                 child: Text(
-        //                   "Status: " + manga.status,
-        //                   style: const TextStyle(
-        //                     color: white,
-        //                     fontSize: 20,
-        //                   ),
-        //                 ),
-        //               ),
-        //               Container(
-        //                 alignment: Alignment.centerLeft,
-        //                 margin: const EdgeInsets.fromLTRB(50, 0, 0, 0),
-        //                 child: Text(
-        //                   "Last updated " + manga.lastUpdated,
-        //                   style: const TextStyle(
-        //                     color: white,
-        //                     fontSize: 20,
-        //                   ),
-        //                 ),
-        //               ),
-        //               Container(
-        //                 alignment: Alignment.centerLeft,
-        //                 margin: const EdgeInsets.fromLTRB(50, 0, 0, 0),
-        //                 child: Text(
-        //                   "Views: " + manga.views,
-        //                   style: const TextStyle(
-        //                     color: white,
-        //                     fontSize: 20,
-        //                   ),
-        //                 ),
-        //               ),
-        //               Container(
-        //                 alignment: Alignment.centerLeft,
-        //                 margin: const EdgeInsets.fromLTRB(50, 0, 0, 0),
-        //                 child: Row(
-        //                   mainAxisSize: MainAxisSize.min,
-        //                   children: [
-        //                     Container(
-        //                       child: const Text(
-        //                         "Genres: ",
-        //                         style: TextStyle(
-        //                           color: white,
-        //                           fontSize: 20,
-        //                         ),
-        //                       ),
-        //                     ),
-        //                     Expanded(
-        //                       child: ListView.builder(
-        //                           shrinkWrap: true,
-        //                           physics:
-        //                               const NeverScrollableScrollPhysics(),
-        //                           itemCount: manga.genres.length,
-        //                           itemBuilder: (_, index) {
-        //                             return Text(
-        //                               manga.genres[index].genre + ', ',
-        //                               style: const TextStyle(
-        //                                 color: white,
-        //                                 fontSize: 20,
-        //                               ),
-        //                             );
-        //                           }),
-        //                     ),
-        //                   ],
-        //                 ),
-        //               ),
-        //             ],
-        //           ),
-        //         ),
-        //       ],
-        //     ),
-        //   ),
-        //   alignment: Alignment.topLeft,
-        // ),
-      ],
+      ),
     ),
+    floatingActionButton: FloatingActionButton.extended(
+      elevation: 2,
+      onPressed: () => Navigator.of(context).push(_createRoute(manga)),
+      label: Text(
+        "Start reading",
+        textAlign: TextAlign.end,
+        style: TextStyle(
+          fontSize: 20,
+          fontFamily: Constant.fontRegular,
+        ),
+      ),
+    ),
+  );
+  // return SingleChildScrollView(
+  //   physics: const BouncingScrollPhysics(),
+  //   child: Hero(
+  //     tag: manga.img,
+  //     child: Stack(
+  //       children: <Widget>[
+  //         Image.network(
+  //           'https://wallpaperaccess.com/full/639663.jpg',
+  //           height: 225,
+  //           width: double.infinity,
+  //           scale: 5.0,
+  //           fit: BoxFit.cover,
+  //         ),
+  //         Container(
+  //           height: parentHeight,
+  //           decoration: BoxDecoration(
+  //             color: Colors.black.withOpacity(0.1),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   ),
+  // );
+}
+
+Route _createRoute(MangaInfoModule manga) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        ChaptersDetails(manga),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      final tween = Tween(begin: begin, end: end);
+      final curvedAnimation = CurvedAnimation(
+        parent: animation,
+        curve: curve,
+      );
+
+      return SlideTransition(
+        position: tween.animate(curvedAnimation),
+        child: child,
+      );
+    },
   );
 }
