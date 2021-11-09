@@ -3,8 +3,7 @@ import 'package:flutter_swiper/flutter_swiper.dart';
 
 import '../models/manga_info_module.dart';
 import '../src/data_source.dart';
-
-DataSource source = DataSource();
+import '../utils/constants.dart';
 
 class Pages extends StatelessWidget {
   String chapterLink;
@@ -22,7 +21,7 @@ class Pages extends StatelessWidget {
         ),
         Expanded(
           child: FutureBuilder(
-            future: source.getChapterPages(chapterLink),
+            future: DataSource.getChapterPages(chapterLink),
             builder: (context, AsyncSnapshot snapshot) {
               if (snapshot.data == null) {
                 return Container(
@@ -39,11 +38,14 @@ class Pages extends StatelessWidget {
               } else {
                 return Swiper(
                   itemCount: snapshot.data.length,
+                  loop: false,
+                  itemHeight: 300,
+                  layout: SwiperLayout.DEFAULT,
                   itemBuilder: (context, index) {
                     return Image.network(
                       snapshot.data[index].img,
                       fit: BoxFit.contain,
-                      headers: {"Referer": "https://readmanganato.com/"},
+                      headers: const {"Referer": Constant.referer},
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) {
                           return child;
@@ -59,9 +61,6 @@ class Pages extends StatelessWidget {
                       },
                     );
                   },
-                  loop: false,
-                  itemHeight: 300,
-                  layout: SwiperLayout.DEFAULT,
                 );
               }
             },

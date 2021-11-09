@@ -1,14 +1,18 @@
 import 'dart:async';
+import 'package:MangaApp/models/bookmarks_module.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 import '../models/home_manga_module.dart';
 import '../models/manga_info_module.dart';
 import '../models/manga_search_module.dart';
+import '../utils/constants.dart';
 
 class DataSource {
-  Future<List<MangaModule>> getLatestManga() async {
-    var url = Uri.parse("https://shonen-jump.herokuapp.com/manga_list");
+  static Future<List<MangaModule>> getLatestManga() async {
+    var url = Uri.parse(Constant.mainUrl + Constant.mangaListPath);
     var data = await http.get(url);
 
     var jsonData = json.decode(data.body)[0]["data"];
@@ -30,10 +34,11 @@ class DataSource {
     return mangas;
   }
 
-  Future<List<MangaModule>> getPopularManga() async {
+  static Future<List<MangaModule>> getPopularManga() async {
     try {
-      var url = Uri.parse(
-          "https://shonen-jump.herokuapp.com/manga_list?orby=topview");
+      var url = Uri.parse(Constant.mainUrl +
+          Constant.mangaListPath +
+          Constant.popularMangaQuery);
       var data = await http.get(url);
 
       var jsonData = json.decode(data.body)[0]["data"];
@@ -69,12 +74,12 @@ class DataSource {
     }
   }
 
-  Future<MangaInfoModule> getMangaInfo(String src) async {
+  static Future<MangaInfoModule> getMangaInfo(String src) async {
     var headers = {
       "url": src,
     };
 
-    var url = Uri.parse("https://shonen-jump.herokuapp.com/manga_info");
+    var url = Uri.parse(Constant.mainUrl + Constant.mangaInfoPath);
     var data = await http.get(url, headers: headers);
 
     var jsonData = json.decode(data.body)[0];
@@ -136,9 +141,8 @@ class DataSource {
     return manga;
   }
 
-  Future<SearchModule> getResults(String query) async {
-    var url =
-        Uri.parse('https://shonen-jump.herokuapp.com/manga_search?find=$query');
+  static Future<SearchModule> getResults(String query) async {
+    var url = Uri.parse('${Constant.mainUrl}${Constant.searchPath}$query');
 
     var data = await http.get(url);
 
@@ -169,11 +173,11 @@ class DataSource {
     return searchResult;
   }
 
-  Future<List<ChapterPages>> getChapterPages(String chapterUrl) async {
+  static Future<List<ChapterPages>> getChapterPages(String chapterUrl) async {
     var headers = {
       "url": chapterUrl,
     };
-    var url = Uri.parse("https://shonen-jump.herokuapp.com/read_manga");
+    var url = Uri.parse(Constant.mainUrl + Constant.chaptersPath);
 
     var data = await http.get(url, headers: headers);
 

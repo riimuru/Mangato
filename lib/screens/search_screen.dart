@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/home_manga_module.dart';
 
 import '../src/data_source.dart';
 import '../screens/manga_info_screen.dart';
-
-DataSource data = DataSource();
+import '../custom/custom_tile.dart';
+import '../models/home_manga_module.dart';
+import '../models/manga_search_module.dart';
 
 class DataSearch extends SearchDelegate<String> {
   @override
@@ -38,6 +38,7 @@ class DataSearch extends SearchDelegate<String> {
       scaffoldBackgroundColor: const Color(0xFF191919),
     );
   }
+
   // @override
   // ThemeData appBarTheme(BuildContext context) {
   //   return Theme.of(context).copyWith(
@@ -70,10 +71,10 @@ class DataSearch extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return Container(
+    return SingleChildScrollView(
       child: FutureBuilder(
-        future: data.getResults(query),
-        builder: (_, AsyncSnapshot snapshot) {
+        future: DataSource.getResults(query),
+        builder: (_, AsyncSnapshot<SearchModule> snapshot) {
           if (snapshot.data == null) {
             return Container(
               child: const Center(
@@ -90,35 +91,38 @@ class DataSearch extends SearchDelegate<String> {
             return ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
-              itemCount: snapshot.data.mangas.length,
-              itemBuilder: (context, int index) => ListTile(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MangaInfo(
-                        MangaModule(
-                          index: index,
-                          title: snapshot.data.mangas[index].title,
-                          img: snapshot.data.mangas[index].img,
-                          src: snapshot.data.mangas[index].src,
-                          views: snapshot.data.mangas[index].views,
+              itemCount: snapshot.data!.mangas.length,
+              itemBuilder: (context, int index) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MangaInfo(
+                          MangaModule(
+                            index: index,
+                            title: snapshot.data!.mangas[index].title,
+                            img: snapshot.data!.mangas[index].img,
+                            src: snapshot.data!.mangas[index].src,
+                            views: snapshot.data!.mangas[index].views,
+                          ),
                         ),
                       ),
+                    );
+                  },
+                  child: CustomListItemTwo(
+                    thumbnail: Image.network(
+                      snapshot.data!.mangas[index].img,
+                      fit: BoxFit.cover,
                     ),
-                  );
-                },
-                leading: const Icon(
-                  Icons.book,
-                  color: Colors.white,
-                ),
-                title: Text(
-                  snapshot.data.mangas[index].title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                    title: snapshot.data!.mangas[index].title,
+                    subtitle: snapshot.data!.mangas[index].chapterTitle,
+                    author: snapshot.data!.mangas[index].authors,
+                    synopsis: snapshot.data!.mangas[index].synopsis,
+                    publishDate: snapshot.data!.mangas[index].updatedDate,
                   ),
-                ),
-              ),
+                );
+              },
             );
           }
         },
@@ -129,10 +133,10 @@ class DataSearch extends SearchDelegate<String> {
   @override
   Widget buildSuggestions(BuildContext context) {
     if (query.isNotEmpty) {
-      return Container(
+      return SingleChildScrollView(
         child: FutureBuilder(
-          future: data.getResults(query),
-          builder: (_, AsyncSnapshot snapshot) {
+          future: DataSource.getResults(query),
+          builder: (_, AsyncSnapshot<SearchModule> snapshot) {
             if (snapshot.data == null) {
               return Container(
                 child: const Center(
@@ -149,35 +153,38 @@ class DataSearch extends SearchDelegate<String> {
               return ListView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                itemCount: snapshot.data.mangas.length,
-                itemBuilder: (context, int index) => ListTile(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => MangaInfo(
-                          MangaModule(
-                            index: index,
-                            title: snapshot.data.mangas[index].title,
-                            img: snapshot.data.mangas[index].img,
-                            src: snapshot.data.mangas[index].src,
-                            views: snapshot.data.mangas[index].views,
+                itemCount: snapshot.data!.mangas.length,
+                itemBuilder: (context, int index) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MangaInfo(
+                            MangaModule(
+                              index: index,
+                              title: snapshot.data!.mangas[index].title,
+                              img: snapshot.data!.mangas[index].img,
+                              src: snapshot.data!.mangas[index].src,
+                              views: snapshot.data!.mangas[index].views,
+                            ),
                           ),
                         ),
+                      );
+                    },
+                    child: CustomListItemTwo(
+                      thumbnail: Image.network(
+                        snapshot.data!.mangas[index].img,
+                        fit: BoxFit.cover,
                       ),
-                    );
-                  },
-                  leading: const Icon(
-                    Icons.book,
-                    color: Colors.white,
-                  ),
-                  title: Text(
-                    snapshot.data.mangas[index].title,
-                    style: const TextStyle(
-                      color: Colors.white,
+                      title: snapshot.data!.mangas[index].title,
+                      subtitle: snapshot.data!.mangas[index].chapterTitle,
+                      author: snapshot.data!.mangas[index].authors,
+                      synopsis: snapshot.data!.mangas[index].synopsis,
+                      publishDate: snapshot.data!.mangas[index].updatedDate,
                     ),
-                  ),
-                ),
+                  );
+                },
               );
             }
           },

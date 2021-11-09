@@ -33,7 +33,7 @@ Widget mangaInfoWidget({
                   children: [
                     Positioned(
                       child: Image.network(
-                        'https://wallpaperaccess.com/full/639663.jpg',
+                        Constant.mangaInfoBackgroundWallpaper,
                         fit: BoxFit.cover,
                         height: 200,
                         width: MediaQuery.of(context).size.width,
@@ -146,12 +146,21 @@ Widget mangaInfoWidget({
                   vertical: 2.0,
                 ),
                 child: Text(
-                  "Description: ",
+                  "Synopsis: ",
                   style: TextStyle(
                     fontFamily: Constant.fontRegular,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: Text(
+                  manga.synopsis,
+                  style: TextStyle(
+                      fontFamily: Constant.fontRegular,
+                      color: Colors.grey[500]),
                 ),
               ),
               (() {
@@ -161,7 +170,7 @@ Widget mangaInfoWidget({
                     child: Row(
                       children: <Widget>[
                         Text(
-                          'Authors -',
+                          'Author(s) -',
                           style: TextStyle(
                             color: Colors.white,
                             fontFamily: Constant.fontRegular,

@@ -9,8 +9,6 @@ import '../screens/search_screen.dart';
 import '../utils/constants.dart';
 import './search_screen.dart';
 
-var dataSource = DataSource();
-
 class ShonenJumpState extends State<ShonenJump> {
   void openSearch() async {
     await showSearch(context: context, delegate: DataSearch());
@@ -36,8 +34,8 @@ class ShonenJumpState extends State<ShonenJump> {
           ),
           IconButton(
             icon: const Icon(
-              Icons.favorite,
-              color: Color.fromRGBO(200, 0, 0, 1),
+              Icons.bookmark_border_outlined,
+              color: Colors.white,
             ),
             onPressed: () => Navigator.push(
               context,
@@ -72,7 +70,7 @@ class ShonenJumpState extends State<ShonenJump> {
               height: 250,
               margin: const EdgeInsets.fromLTRB(5, 0, 0, 0),
               child: FutureBuilder(
-                future: dataSource.getLatestManga(),
+                future: DataSource.getLatestManga(),
                 builder: (_, AsyncSnapshot snapshot) {
                   if (snapshot.data == null) {
                     return Container(
@@ -114,7 +112,7 @@ class ShonenJumpState extends State<ShonenJump> {
               // width: double.infinity,
               children: [
                 FutureBuilder(
-                  future: dataSource.getPopularManga(),
+                  future: DataSource.getPopularManga(),
                   builder: (_, AsyncSnapshot snapshot) {
                     if (snapshot.data == null) {
                       return Container(

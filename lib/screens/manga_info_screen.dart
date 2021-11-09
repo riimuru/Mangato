@@ -5,6 +5,7 @@ import '../models/home_manga_module.dart';
 import '../widgets/manga_info_widget.dart';
 import '../models/manga_info_module.dart';
 import '../utils/constants.dart';
+import '../src/data_source.dart';
 
 class MangaInfo extends StatefulWidget {
   final MangaModule manga;
@@ -59,7 +60,7 @@ class MangaInfoState extends State<MangaInfo>
         ),
       ),
       body: FutureBuilder(
-        future: dataSource.getMangaInfo(manga.src),
+        future: DataSource.getMangaInfo(manga.src),
         builder: (_, AsyncSnapshot<MangaInfoModule> snapshot) {
           if (snapshot.data == null) {
             return Container(
