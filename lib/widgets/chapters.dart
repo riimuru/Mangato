@@ -1,4 +1,4 @@
-import 'package:MangaApp/screens/favorite_screen.dart';
+import '../screens/favorite_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../models/manga_info_module.dart';
@@ -26,12 +26,21 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
   @override
   void initState() {
     super.initState();
-    _chaptersFuture = getChapters();
+    _chaptersFuture = getChaptersByTitle();
   }
 
-  getChapters() async {
-    final _chapterData = await DatabaseHelper.db.getChapters();
+  getChaptersByTitle() async {
+    final _chapterData =
+        await DatabaseHelper.db.getChaptersByTitle(manga.title);
     return _chapterData;
+  }
+
+  fix() {
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      setState(() {
+        _chaptersFuture = getChaptersByTitle();
+      });
+    });
   }
 
   @override
@@ -76,10 +85,19 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
                       case ConnectionState.active:
                         return Container();
                       case ConnectionState.done:
-                        if (!chapters.isNotEmpty) {
+                        if (snapshot.data != null) {
                           chapters =
                               List<Map<String, Object>>.from(snapshot.data);
+
+                          manga.chapters.forEach((c) {
+                            if (chapters
+                                .map((e) => e['chapterTitle'])
+                                .contains(c.chapterTitle)) {
+                              c.isFavorite = true;
+                            }
+                          });
                         }
+
                         return Container(
                           padding: const EdgeInsets.only(left: 4.0, right: 4.0),
                           height: MediaQuery.of(context).size.height,
@@ -88,19 +106,6 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
                             scrollDirection: Axis.vertical,
                             shrinkWrap: true,
                             children: manga.chapters.map((c) {
-                              bool isFavorite = false;
-                              var map = chapters.asMap();
-                              map.forEach((i, e) {
-                                if (e['chapterTitle'] == c.chapterTitle &&
-                                    e['title'] == manga.title) {
-                                  print(c.chapterTitle);
-                                  isFavorite = true;
-                                  return;
-                                } else {
-                                  isFavorite = false;
-                                }
-                              });
-
                               return ListTile(
                                 title: Text(
                                   c.chapterTitle,
@@ -137,31 +142,38 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
                                           const EdgeInsets.fromLTRB(0, 0, 0, 0),
                                       alignment: Alignment.center,
                                       iconSize: 24,
-                                      icon: isFavorite
-                                          ? const Icon(Icons.star,
-                                              color: Colors.white)
-                                          : const Icon(
-                                              Icons.star_border,
-                                              color: Colors.white,
-                                            ),
-                                      onPressed: () {
-                                        if (isFavorite) {
-                                          isFavorite = false;
+                                      icon: (() {
+                                        if (c.isFavorite) {
+                                          return const Icon(Icons.star,
+                                              color: Colors.white);
                                         } else {
-                                          isFavorite = true;
-                                          var addChapter = FavoriteChapters(
-                                            id: DateTime.now()
-                                                .millisecondsSinceEpoch,
-                                            title: manga.title,
-                                            alt: manga.alt,
-                                            img: manga.img,
-                                            chapterTitle: c.chapterTitle,
-                                            chapterViews: c.chapterViews,
-                                            chapterLink: c.chapterLink,
-                                          );
-                                          DatabaseHelper.db
-                                              .insertChapter(addChapter);
+                                          return const Icon(Icons.star_border,
+                                              color: Colors.white);
                                         }
+                                      }()),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (c.isFavorite) {
+                                            c.isFavorite = false;
+                                            DatabaseHelper.db.deleteChapter(
+                                                manga.title, c.chapterTitle);
+                                          } else {
+                                            c.isFavorite = true;
+                                            var addChapter = FavoriteChapters(
+                                              id: DateTime.now()
+                                                  .millisecondsSinceEpoch,
+                                              title: manga.title,
+                                              alt: manga.alt,
+                                              img: manga.img,
+                                              chapterTitle: c.chapterTitle,
+                                              chapterViews: c.chapterViews,
+                                              chapterLink: c.chapterLink,
+                                              isFavorite: true,
+                                            );
+                                            DatabaseHelper.db
+                                                .insertChapter(addChapter);
+                                          }
+                                        });
                                       },
                                     )
                                   ],

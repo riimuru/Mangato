@@ -6,6 +6,7 @@ class FavoriteChapters {
   final String chapterTitle;
   final String chapterViews;
   final String chapterLink;
+  final bool isFavorite;
 
   FavoriteChapters({
     required this.id,
@@ -15,6 +16,7 @@ class FavoriteChapters {
     required this.chapterTitle,
     required this.chapterViews,
     required this.chapterLink,
+    required this.isFavorite,
   });
 
   Map<String, dynamic> toMap() {

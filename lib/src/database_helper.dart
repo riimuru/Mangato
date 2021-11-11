@@ -18,13 +18,13 @@ class DatabaseHelper {
 
   _initDb() async {
     return openDatabase(
-      // Set the path to the database. Note: Using the `join` function from the
-      // `path` package is best practice to ensure the path is correctly
-      // constructed for each platform.
+      // Set  path to the database. Note: Using the `join` function from the
+      // `path`  is best practice to ensure the path is correctly
+      // constructed  each platform.
       join(await getDatabasesPath(), 'manga_database.db'),
-      // When the database is first created, create a table to store dogs.
+      // When  database is first created, create a table to store dogs.
       onCreate: (db, version) {
-        // Run the CREATE TABLE statement on the database.
+        // Run  CREATE TABLE statement on the database.
         return db.execute(
           '''
           CREATE TABLE chapters(
@@ -33,21 +33,20 @@ class DatabaseHelper {
             ''',
         );
       },
-      // Set the version. This executes the onCreate function and provides a
-      // path to perform database upgrades and downgrades.
+      // Set  version. This executes the onCreate function and provides a
+      // path  perform database upgrades and downgrades.
       version: 1,
     );
   }
 
-  // Define a function that inserts dogs into the database
   insertChapter(FavoriteChapters chapter) async {
-    // Get a reference to the database.
+    // Get  reference to the database.
     final db = await database;
 
-    // Insert the Dog into the correct table. You might also specify the
-    // `conflictAlgorithm` to use in case the same dog is inserted twice.
+    // Insert  Dog into the correct table. You might also specify the
+    // `conflictAlgorithm`  use in case the same dog is inserted twice.
     //
-    // In this case, replace any previous data.
+    //   case, replace any previous data.
     var res = await db!.insert(
       'chapters',
       chapter.toMap(),
@@ -56,58 +55,75 @@ class DatabaseHelper {
     return res;
   }
 
-  // // A method that retrieves all the dogs from the dogs table.
-  // Future<List<FavoriteChapters>> queryAll() async {
-  //   // Get a reference to the database.
-  //   final db = await database;
+  // //   that retrieves all the dogs from the dogs table.
+  // Future<<FavoriteChapters>> queryAll() async {
+  //   //   reference to the database.
+  //   final  = await database;
 
-  //   // Query the table for all The Dogs.
-  //   final List<Map<String, dynamic>> maps = await db.query('dogs');
+  //   //   table for all The Dogs.
+  //   final <Map<String, dynamic>> maps = await db.query('dogs');
 
-  //   // Convert the List<Map<String, dynamic> into a List<Dog>.
-  //   return List.generate(maps.length, (i) {
-  //     return Dog(
-  //       id: maps[i]['id'],
-  //       name: maps[i]['name'],
-  //       age: maps[i]['age'],
+  //   //   List<Map<String, dynamic> into a List<Dog>.
+  //   return .generate(maps.length, (i) {
+  //     return (
+  //       id: [i]['id'],
+  //       name: [i]['name'],
+  //       age: [i]['age'],
   //     );
   //   });
   // }
-
   updateChapter(FavoriteChapters chapter) async {
-    // Get a reference to the database.
+    // Get  reference to the database.
     final db = await database;
 
-    // Update the given Dog.
+    // Update  given Dog.
     await db!.update(
       'chapters',
       chapter.toMap(),
-      // Ensure that the Dog has a matching id.
+      // Ensure  the Dog has a matching id.
       where: 'id = ?',
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
+      // Pass  Dog's id as a whereArg to prevent SQL injection.
       whereArgs: [chapter.id],
     );
   }
 
-  deleteChapter(int id) async {
-    // Get a reference to the database.
+  deleteChapter(String title, String chapterTitle) async {
+    // Get  reference to the database.
     final db = await database;
 
-    // Remove the Dog from the database.
+    // Remove  Dog from the database.
     await db!.delete(
       'chapters',
-      // Use a `where` clause to delete a specific dog.
-      where: 'id = ?',
-      // Pass the Dog's id as a whereArg to prevent SQL injection.
-      whereArgs: [id],
+      // Use  `where` clause to delete a specific dog.
+      where: 'title = ? AND chapterTitle = ?',
+      // Pass  Dog's id as a whereArg to prevent SQL injection.
+      whereArgs: [title, chapterTitle],
     );
   }
 
   Future<dynamic> getChapters() async {
     final db = await database;
 
-    var res = await db!.query("chapters");
-    if (res.length == 0) {
+    var res = await db!.query(
+      "chapters",
+    );
+    if (res.isEmpty) {
+      return null;
+    } else {
+      var resMap = res;
+      return resMap.isNotEmpty ? resMap : Null;
+    }
+  }
+
+  Future<dynamic> getChaptersByTitle(String title) async {
+    final db = await database;
+
+    var res = await db!.query(
+      "chapters",
+      where: "title = ?",
+      whereArgs: [title],
+    );
+    if (res.isEmpty) {
       return null;
     } else {
       var resMap = res;

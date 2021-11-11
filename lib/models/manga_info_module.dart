@@ -55,12 +55,14 @@ class Chapters {
   final String chapterViews;
   final String uploadedDate;
   final String chapterLink;
+  bool isFavorite;
 
   Chapters({
     required this.chapterTitle,
     required this.chapterViews,
     required this.uploadedDate,
     required this.chapterLink,
+    this.isFavorite = false,
   });
 }
 

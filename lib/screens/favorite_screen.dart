@@ -1,6 +1,5 @@
-import 'package:MangaApp/src/database_helper.dart';
 import 'package:flutter/material.dart';
-import '';
+import '../src/database_helper.dart';
 
 class Favorites extends StatefulWidget {
   @override
@@ -21,6 +20,20 @@ class FavoritesState extends State<Favorites> {
   getChapters() async {
     final _chapterData = await DatabaseHelper.db.getChapters();
     return _chapterData;
+  }
+
+  removeItem(String title, String chapterTitle) {
+    try {
+      DatabaseHelper.db.deleteChapter(title, chapterTitle);
+      chapters.removeWhere((item) =>
+          item.containsValue(title) && item.containsValue(chapterTitle));
+
+      setState(() {
+        _chapterFuture = getChapters();
+      });
+    } catch (err) {
+      print(err);
+    }
   }
 
   @override
@@ -76,28 +89,56 @@ class FavoritesState extends State<Favorites> {
                     case ConnectionState.active:
                       return Container();
                     case ConnectionState.done:
-                      if (chapters.isNotEmpty) {
+                      if (snapshot.data != null) {
                         chapters =
                             List<Map<String, Object>>.from(snapshot.data);
                       }
-                      return SingleChildScrollView(
-                        child: ListView(
-                          children: chapters
-                              .map<Widget>((e) => ListTile(
-                                    title: Text(
-                                      e['chapterTitle'].toString() +
-                                          " From " +
-                                          e['title'].toString(),
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ))
-                              .toList(),
-                        ),
-                      );
+                      return (() {
+                        if (chapters.isEmpty) {
+                          return Container(
+                            child: const Center(
+                              child: Text(
+                                "Chapters",
+                                style: TextStyle(
+                                  color: Color(0xFFFFFFFF),
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return SingleChildScrollView(
+                            child: ListView(
+                              shrinkWrap: true,
+                              children: chapters
+                                  .map<Widget>((e) => ListTile(
+                                        title: Text(
+                                          e['chapterTitle'].toString() +
+                                              " From " +
+                                              e['title'].toString(),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        trailing: GestureDetector(
+                                          child: const Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                          ),
+                                          onTap: () {
+                                            removeItem(e['title'].toString(),
+                                                e['chapterTitle'].toString());
+                                          },
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
+                          );
+                        }
+                      }());
                   }
-                  return Container();
                 },
               );
               // return Container(
