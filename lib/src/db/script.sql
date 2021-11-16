@@ -1,0 +1,2 @@
+CREATE TABLE chapters(id INTEGER PRIMARY KEY, title TEXT, alt Text, img TEXT, chapterTitle TEXT, chapterViews TEXT, chapterLink TEXT);
+CREATE TABLE manga(id INTEGER PRIMARY KEY, title TEXT, alt TEXT, img TEXT, mangaLink TEXT, synopsis TEXT, views TEXT, rating TEXT);

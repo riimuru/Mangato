@@ -136,6 +136,7 @@ class DataSource {
       src: src,
       views: views,
       chapters: chapters,
+      mangaLink: src,
     );
 
     return manga;

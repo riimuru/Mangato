@@ -12,6 +12,7 @@ class MangaInfoModule {
   final String views;
   final String src;
   final List<Chapters> chapters;
+  final String mangaLink;
 
   MangaInfoModule({
     required this.title,
@@ -27,6 +28,7 @@ class MangaInfoModule {
     required this.src,
     required this.views,
     required this.chapters,
+    required this.mangaLink,
   });
 }
 

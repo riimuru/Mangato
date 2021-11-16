@@ -1,3 +1,5 @@
+import 'package:flutter/scheduler.dart';
+
 import '../screens/favorite_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -26,19 +28,41 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
   @override
   void initState() {
     super.initState();
-    _chaptersFuture = getChaptersByTitle();
+    _chaptersFuture = getChaptersByMangaTitle();
   }
 
-  getChaptersByTitle() async {
+  getChaptersByMangaTitle() async {
     final _chapterData =
-        await DatabaseHelper.db.getChaptersByTitle(manga.title);
+        await DatabaseHelper.db.getChaptersByMangaTitle(manga.title);
     return _chapterData;
   }
 
+  deleteChapterFromDatabase(String title, String chapterTitle) {
+    DatabaseHelper.db.deleteChapter(manga.title, chapterTitle);
+    chapters.removeWhere((item) =>
+        item.containsValue(title) && item.containsValue(chapterTitle));
+    fix();
+  }
+
+  addChapterToDatabase(String title, String alt, String img,
+      String chapterTitle, String chapterViews, String chapterLink) {
+    var addChapter = FavoriteChapters(
+      id: DateTime.now().millisecondsSinceEpoch,
+      title: title,
+      alt: alt,
+      img: img,
+      chapterTitle: chapterTitle,
+      chapterViews: chapterViews,
+      chapterLink: chapterLink,
+      isFavorite: true,
+    );
+    DatabaseHelper.db.insertChapter(addChapter);
+  }
+
   fix() {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    SchedulerBinding.instance?.addPostFrameCallback((_) {
       setState(() {
-        _chaptersFuture = getChaptersByTitle();
+        _chaptersFuture = getChaptersByMangaTitle();
       });
     });
   }
@@ -155,23 +179,17 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
                                         setState(() {
                                           if (c.isFavorite) {
                                             c.isFavorite = false;
-                                            DatabaseHelper.db.deleteChapter(
+                                            deleteChapterFromDatabase(
                                                 manga.title, c.chapterTitle);
                                           } else {
                                             c.isFavorite = true;
-                                            var addChapter = FavoriteChapters(
-                                              id: DateTime.now()
-                                                  .millisecondsSinceEpoch,
-                                              title: manga.title,
-                                              alt: manga.alt,
-                                              img: manga.img,
-                                              chapterTitle: c.chapterTitle,
-                                              chapterViews: c.chapterViews,
-                                              chapterLink: c.chapterLink,
-                                              isFavorite: true,
-                                            );
-                                            DatabaseHelper.db
-                                                .insertChapter(addChapter);
+                                            addChapterToDatabase(
+                                                manga.title,
+                                                manga.alt,
+                                                manga.img,
+                                                c.chapterTitle,
+                                                c.chapterViews,
+                                                c.chapterLink);
                                           }
                                         });
                                       },

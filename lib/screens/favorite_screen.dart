@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/pages.dart';
 import '../src/database_helper.dart';
 
 class Favorites extends StatefulWidget {
@@ -8,8 +9,10 @@ class Favorites extends StatefulWidget {
 
 class FavoritesState extends State<Favorites> {
   List<Map<String, Object>> chapters = [];
+  List<Map<String, Object>> mangas = [];
 
   Future? _chapterFuture;
+  Future? _mangaFuture;
 
   @override
   void initState() {
@@ -22,7 +25,7 @@ class FavoritesState extends State<Favorites> {
     return _chapterData;
   }
 
-  removeItem(String title, String chapterTitle) {
+  removeChapter(String title, String chapterTitle) {
     try {
       DatabaseHelper.db.deleteChapter(title, chapterTitle);
       chapters.removeWhere((item) =>
@@ -30,6 +33,23 @@ class FavoritesState extends State<Favorites> {
 
       setState(() {
         _chapterFuture = getChapters();
+      });
+    } catch (err) {
+      print(err);
+    }
+  }
+
+  getMangas() async {
+    final _mangaData = await DatabaseHelper.db.getMangas();
+    return _mangaData;
+  }
+
+  removeManga(String title) {
+    try {
+      DatabaseHelper.db.deleteManga(title);
+      mangas.removeWhere((element) => element.containsValue(title));
+      setState(() {
+        _mangaFuture = getMangas();
       });
     } catch (err) {
       print(err);
@@ -73,14 +93,12 @@ class FavoritesState extends State<Favorites> {
                 builder: (context, AsyncSnapshot<dynamic> snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.none:
-                      return Container(
-                        child: const Center(
-                          child: Text(
-                            "Chapters",
-                            style: TextStyle(
-                              color: Color(0xFFFFFFFF),
-                              fontSize: 20,
-                            ),
+                      return const Center(
+                        child: Text(
+                          "Chapters",
+                          style: TextStyle(
+                            color: Color(0xFFFFFFFF),
+                            fontSize: 20,
                           ),
                         ),
                       );
@@ -95,14 +113,12 @@ class FavoritesState extends State<Favorites> {
                       }
                       return (() {
                         if (chapters.isEmpty) {
-                          return Container(
-                            child: const Center(
-                              child: Text(
-                                "Chapters",
-                                style: TextStyle(
-                                  color: Color(0xFFFFFFFF),
-                                  fontSize: 20,
-                                ),
+                          return const Center(
+                            child: Text(
+                              "Chapters",
+                              style: TextStyle(
+                                color: Color(0xFFFFFFFF),
+                                fontSize: 20,
                               ),
                             ),
                           );
@@ -111,7 +127,12 @@ class FavoritesState extends State<Favorites> {
                             child: ListView(
                               shrinkWrap: true,
                               children: chapters
-                                  .map<Widget>((e) => ListTile(
+                                  .map<Widget>(
+                                    (e) => GestureDetector(
+                                      onTap: () => Navigator.of(context).push(
+                                          _createRoute(
+                                              e["chapterLink"].toString())),
+                                      child: ListTile(
                                         title: Text(
                                           e['chapterTitle'].toString() +
                                               " From " +
@@ -128,11 +149,13 @@ class FavoritesState extends State<Favorites> {
                                             color: Colors.white,
                                           ),
                                           onTap: () {
-                                            removeItem(e['title'].toString(),
+                                            removeChapter(e['title'].toString(),
                                                 e['chapterTitle'].toString());
                                           },
                                         ),
-                                      ))
+                                      ),
+                                    ),
+                                  )
                                   .toList(),
                             ),
                           );
@@ -158,4 +181,26 @@ class FavoritesState extends State<Favorites> {
       ),
     );
   }
+}
+
+Route _createRoute(String manga) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => Pages(manga),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      final tween = Tween(begin: begin, end: end);
+      final curvedAnimation = CurvedAnimation(
+        parent: animation,
+        curve: curve,
+      );
+
+      return SlideTransition(
+        position: tween.animate(curvedAnimation),
+        child: child,
+      );
+    },
+  );
 }
