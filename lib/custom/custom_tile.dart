@@ -4,14 +4,14 @@ class _MangaDescription extends StatelessWidget {
   const _MangaDescription({
     Key? key,
     required this.title,
-    required this.subtitle,
+    required this.latestChapter,
     required this.author,
     required this.publishDate,
     required this.synopsis,
   }) : super(key: key);
 
   final String title;
-  final String subtitle;
+  final String latestChapter;
   final String author;
   final String publishDate;
   final String synopsis;
@@ -35,16 +35,24 @@ class _MangaDescription extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-              const Padding(padding: EdgeInsets.only(bottom: 2.0)),
-              Text(
-                "Recent: $subtitle",
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.white,
-                ),
-              ),
+              (() {
+                return (latestChapter.isNotEmpty)
+                    ? const Padding(padding: EdgeInsets.only(bottom: 2.0))
+                    : Container();
+              }()),
+              (() {
+                return (latestChapter.isNotEmpty)
+                    ? Text(
+                        "Latest: $latestChapter",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12.0,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Container();
+              }()),
               const Padding(padding: EdgeInsets.only(bottom: 2.0)),
               Text(
                 synopsis,
@@ -59,7 +67,7 @@ class _MangaDescription extends StatelessWidget {
           ),
         ),
         Expanded(
-          flex: 1,
+          flex: 0,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
@@ -91,7 +99,7 @@ class CustomListItemTwo extends StatelessWidget {
       {Key? key,
       required this.thumbnail,
       required this.title,
-      required this.subtitle,
+      required this.latestChapter,
       required this.author,
       required this.synopsis,
       required this.publishDate})
@@ -99,7 +107,7 @@ class CustomListItemTwo extends StatelessWidget {
 
   final Widget thumbnail;
   final String title;
-  final String subtitle;
+  final String latestChapter;
   final String author;
   final String publishDate;
   final String synopsis;
@@ -108,20 +116,20 @@ class CustomListItemTwo extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: SizedBox(
-        height: 120,
+        height: 145,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             SizedBox(
-              width: 100,
+              width: 120,
               child: thumbnail,
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12.0, 0.0, 2.0, 0.0),
+                padding: const EdgeInsets.fromLTRB(10.0, 0.0, 2.0, 0.0),
                 child: _MangaDescription(
                   title: title,
-                  subtitle: subtitle,
+                  latestChapter: latestChapter,
                   author: author,
                   publishDate: publishDate,
                   synopsis: synopsis,

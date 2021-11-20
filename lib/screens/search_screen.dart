@@ -7,6 +7,10 @@ import '../models/home_manga_module.dart';
 import '../models/manga_search_module.dart';
 
 class DataSearch extends SearchDelegate<String> {
+  DataSearch({Key? key}) : super();
+
+  SearchModule? searchRes;
+
   @override
   ThemeData appBarTheme(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -72,62 +76,42 @@ class DataSearch extends SearchDelegate<String> {
   @override
   Widget buildResults(BuildContext context) {
     return SingleChildScrollView(
-      child: FutureBuilder(
-        future: DataSource.getResults(query),
-        builder: (_, AsyncSnapshot<SearchModule> snapshot) {
-          if (snapshot.data == null) {
-            return Container(
-              child: const Center(
-                child: Text(
-                  "Loading...",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
+        child: ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: searchRes!.mangas.length,
+      itemBuilder: (context, int index) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MangaInfo(
+                  MangaModule(
+                    index: index,
+                    title: searchRes!.mangas[index].title,
+                    img: searchRes!.mangas[index].img,
+                    src: searchRes!.mangas[index].src,
+                    views: searchRes!.mangas[index].views,
                   ),
                 ),
               ),
             );
-          } else {
-            return ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: snapshot.data!.mangas.length,
-              itemBuilder: (context, int index) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => MangaInfo(
-                          MangaModule(
-                            index: index,
-                            title: snapshot.data!.mangas[index].title,
-                            img: snapshot.data!.mangas[index].img,
-                            src: snapshot.data!.mangas[index].src,
-                            views: snapshot.data!.mangas[index].views,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  child: CustomListItemTwo(
-                    thumbnail: Image.network(
-                      snapshot.data!.mangas[index].img,
-                      fit: BoxFit.cover,
-                    ),
-                    title: snapshot.data!.mangas[index].title,
-                    subtitle: snapshot.data!.mangas[index].chapterTitle,
-                    author: snapshot.data!.mangas[index].authors,
-                    synopsis: snapshot.data!.mangas[index].synopsis,
-                    publishDate: snapshot.data!.mangas[index].updatedDate,
-                  ),
-                );
-              },
-            );
-          }
-        },
-      ),
-    );
+          },
+          child: CustomListItemTwo(
+            thumbnail: Image.network(
+              searchRes!.mangas[index].img,
+              fit: BoxFit.cover,
+            ),
+            title: searchRes!.mangas[index].title,
+            latestChapter: searchRes!.mangas[index].chapterTitle,
+            author: searchRes!.mangas[index].authors,
+            synopsis: searchRes!.mangas[index].synopsis,
+            publishDate: searchRes!.mangas[index].updatedDate,
+          ),
+        );
+      },
+    ));
   }
 
   @override
@@ -155,6 +139,7 @@ class DataSearch extends SearchDelegate<String> {
                 shrinkWrap: true,
                 itemCount: snapshot.data!.mangas.length,
                 itemBuilder: (context, int index) {
+                  searchRes = snapshot.data!;
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -178,7 +163,7 @@ class DataSearch extends SearchDelegate<String> {
                         fit: BoxFit.cover,
                       ),
                       title: snapshot.data!.mangas[index].title,
-                      subtitle: snapshot.data!.mangas[index].chapterTitle,
+                      latestChapter: snapshot.data!.mangas[index].chapterTitle,
                       author: snapshot.data!.mangas[index].authors,
                       synopsis: snapshot.data!.mangas[index].synopsis,
                       publishDate: snapshot.data!.mangas[index].updatedDate,

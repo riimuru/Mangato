@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 const white = Color(0xFFFFFFFF);
 
 class Constant {
-  static String mangaInfoBackgroundWallpaper =
+  static const String mangaInfoBackgroundWallpaper =
       "https://wallpaperaccess.com/full/639663.jpg";
 
-  static String fontMedium = "UbuntuMedium";
-  static String fontLight = "UbuntuLight";
-  static String fontRegular = "UbuntuRegular";
+  static const String fontMedium = "UbuntuMedium";
+  static const String fontLight = "UbuntuLight";
+  static const String fontRegular = "UbuntuRegular";
   static const String mainUrl = "https://shonen-jump.herokuapp.com/";
   static const String mangaListPath = "manga_list";
   static const String popularMangaQuery = "?orby=topview";

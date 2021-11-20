@@ -27,6 +27,9 @@ class DataSource {
         src: item["src"],
         img: item["img"],
         views: item["views"],
+        author: item["authors"],
+        rating: item["rating"],
+        uploadedDate: item["uploadedDate"],
       );
 
       mangas.add(manga);
@@ -53,6 +56,9 @@ class DataSource {
           src: item["src"],
           img: item["img"],
           views: item["views"],
+          author: item["authors"],
+          rating: item["rating"],
+          uploadedDate: item["uploadedDate"],
         );
 
         mangas.add(manga);

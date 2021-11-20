@@ -1,13 +1,14 @@
-import 'package:MangaApp/models/bookmarks_module.dart';
-import 'package:MangaApp/src/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/home_manga_module.dart';
-import '../widgets/manga_info_widget.dart';
 import '../models/manga_info_module.dart';
 import '../utils/constants.dart';
 import '../src/data_source.dart';
+import '../custom/star_rating.dart';
+import '../widgets/chapters.dart';
+import '../models/bookmarks_module.dart';
+import '../src/database_helper.dart';
 
 class MangaInfo extends StatefulWidget {
   final MangaModule manga;
@@ -22,7 +23,8 @@ class MangaInfoState extends State<MangaInfo>
     with SingleTickerProviderStateMixin {
   final MangaModule manga;
   Future? _mangaFuture;
-  Map<String, Object> mangaObj = {};
+  Map<String, Object?>? mangaObj;
+  FavoriteManga? favManga;
   MangaInfoState(this.manga);
 
   late TabController _controller;
@@ -39,23 +41,47 @@ class MangaInfoState extends State<MangaInfo>
     return _mangaData;
   }
 
-  deleteMangaFromDatabase() {
-    DatabaseHelper.db.deleteManga(manga.title);
-    mangaObj.clear();
+  deleteMangaFromDatabase(String title) {
+    DatabaseHelper.db.deleteManga(title);
+    favManga = null;
   }
 
-  addMangaToDatabase(String title, String img, String mangaLink,
-      String synopsis, String views) {
+  addMangaToDatabase(
+    String title,
+    String img,
+    String mangaLink,
+    String synopsis,
+    String views,
+    String uploadedDate,
+    String authors,
+    String rating,
+  ) {
+    int timeStmap = DateTime.now().millisecondsSinceEpoch;
     var addManga = FavoriteManga(
-      id: DateTime.now().millisecondsSinceEpoch,
+      id: timeStmap,
       title: title,
       img: img,
       mangaLink: mangaLink,
       synopsis: synopsis,
       views: views,
+      author: authors,
+      rating: rating,
+      uploadedDate: uploadedDate,
       isFavorite: true,
     );
     DatabaseHelper.db.insertManga(addManga);
+    favManga = FavoriteManga(
+      id: timeStmap,
+      title: title,
+      img: img,
+      mangaLink: mangaLink,
+      synopsis: synopsis,
+      views: views,
+      author: authors,
+      rating: rating,
+      uploadedDate: uploadedDate,
+      isFavorite: true,
+    );
   }
 
   @override
@@ -78,7 +104,7 @@ class MangaInfoState extends State<MangaInfo>
               manga.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18.0,
                 fontFamily: Constant.fontRegular,
@@ -100,16 +126,45 @@ class MangaInfoState extends State<MangaInfo>
                     return Container();
                   case ConnectionState.done:
                     if (snapshot.data != null) {
-                      mangaObj = Map<String, Object>.from(snapshot.data);
-                      print(mangaObj);
+                      mangaObj = Map<String, Object?>.from(snapshot.data?[0]);
+                      favManga = FavoriteManga(
+                        id: int.parse(mangaObj?.values.first.toString() ?? "0"),
+                        title: mangaObj?.values.elementAt(1).toString() ?? "",
+                        img: mangaObj?.values.elementAt(3).toString() ?? "",
+                        mangaLink:
+                            mangaObj?.values.elementAt(4).toString() ?? "",
+                        synopsis:
+                            mangaObj?.values.elementAt(5).toString() ?? "",
+                        views: mangaObj?.values.elementAt(6).toString() ?? "",
+                        isFavorite: true,
+                      );
                     }
                     return IconButton(
-                      icon: const Icon(
-                        Icons.bookmark_add_sharp,
-                        color: white,
-                      ),
-                      onPressed: () => addMangaToDatabase(manga.title,
-                          manga.img, manga.src, manga.synopsis, manga.views),
+                      icon: (favManga == null)
+                          ? const Icon(
+                              Icons.bookmark_add_outlined,
+                              color: white,
+                            )
+                          : const Icon(
+                              Icons.bookmark_added_sharp,
+                              color: white,
+                            ),
+                      onPressed: () => setState(() {
+                        if (favManga == null) {
+                          addMangaToDatabase(
+                            manga.title,
+                            manga.img,
+                            manga.src,
+                            manga.synopsis,
+                            manga.views,
+                            manga.uploadedDate,
+                            manga.author,
+                            manga.rating,
+                          );
+                        } else {
+                          deleteMangaFromDatabase(manga.title);
+                        }
+                      }),
                       iconSize: 27.0,
                       enableFeedback: true,
                       splashRadius: 15.0,
@@ -118,7 +173,7 @@ class MangaInfoState extends State<MangaInfo>
               }),
         ],
       ),
-      body: FutureBuilder(
+      body: FutureBuilder<MangaInfoModule>(
         future: DataSource.getMangaInfo(manga.src),
         builder: (_, AsyncSnapshot<MangaInfoModule> snapshot) {
           if (snapshot.data == null) {
@@ -134,10 +189,355 @@ class MangaInfoState extends State<MangaInfo>
               ),
             );
           } else {
-            return mangaInfoWidget(manga: snapshot.data!, context: _);
+            return (() {
+              MangaInfoModule mangaInfo = snapshot.data!;
+              final parentHeight = MediaQuery.of(context).size.height;
+              final appBarHeight = parentHeight / 2.5;
+              final thumbHeight = appBarHeight / 1.5;
+              var textTheme = Theme.of(context).textTheme;
+
+              int maxLines = 3;
+
+              return Scaffold(
+                backgroundColor: Colors.black12,
+                body: SafeArea(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          Container(
+                            width: double.infinity,
+                            height: 300,
+                            child: Stack(
+                              children: [
+                                Positioned(
+                                  child: Image.network(
+                                    Constant.mangaInfoBackgroundWallpaper,
+                                    fit: BoxFit.cover,
+                                    height: 200,
+                                    width: MediaQuery.of(context).size.width,
+                                  ),
+                                ),
+                                Container(
+                                  height: 200,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.1),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 100,
+                                  left: 170,
+                                  width:
+                                      MediaQuery.of(context).size.width / 1.75,
+                                  child: Text(
+                                    mangaInfo.title,
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: true,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 23,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 100,
+                                  left: 10,
+                                  child: Image.network(
+                                    mangaInfo.img,
+                                    fit: BoxFit.cover,
+                                    height: 200,
+                                    width: 150,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 200,
+                                  left: 155,
+                                  width:
+                                      MediaQuery.of(context).size.width / 1.75,
+                                  child: ListTile(
+                                    leading: const Icon(
+                                      Icons.remove_red_eye,
+                                      color: Colors.white,
+                                    ),
+                                    title: Transform.translate(
+                                      child: Text(
+                                        mangaInfo.views,
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        softWrap: true,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: Constant.fontRegular,
+                                        ),
+                                      ),
+                                      offset: const Offset(-25, 0),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                    top: 240,
+                                    left: 162,
+                                    width: MediaQuery.of(context).size.width /
+                                        1.75,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: mangaInfo.rating != ''
+                                          ? StarRating(
+                                              color: Theme.of(context)
+                                                  .primaryColor,
+                                              rating: double.parse(
+                                                  mangaInfo.rating),
+                                              starCount: 5,
+                                            )
+                                          : Container(),
+                                    )),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding:
+                                const EdgeInsets.only(left: 4.0, right: 4.0),
+                            height: 50.0,
+                            child: ListView(
+                              physics: const BouncingScrollPhysics(),
+                              scrollDirection: Axis.horizontal,
+                              children: mangaInfo.genres
+                                  .map<Widget>(
+                                    (g) => Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0),
+                                      child: Chip(
+                                        labelPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 8.0),
+                                        label: Text(
+                                          g.genre,
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontFamily: Constant.fontMedium,
+                                          ),
+                                        ),
+                                        backgroundColor:
+                                            Theme.of(context).primaryColor,
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                          Container(
+                            alignment: Alignment.bottomLeft,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 2.0,
+                            ),
+                            child: Text(
+                              "Synopsis: ",
+                              style: TextStyle(
+                                fontFamily: Constant.fontRegular,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10.0),
+                            child: Text(
+                              mangaInfo.synopsis,
+                              style: TextStyle(
+                                  fontFamily: Constant.fontRegular,
+                                  color: Colors.grey[500]),
+                              maxLines: null,
+                            ),
+                          ),
+                          (() {
+                            if (mangaInfo.authors.isNotEmpty) {
+                              return Container(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: <Widget>[
+                                    Text(
+                                      'Author(s) -',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: Constant.fontRegular,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(left: 10.0),
+                                      child: Text(
+                                        mangaInfo.authors
+                                            .map<String>((e) => e.authorName)
+                                            .join(', '),
+                                        style: TextStyle(
+                                            fontFamily: Constant.fontRegular,
+                                            color: Colors.grey[500]),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              return Container();
+                            }
+                            // your code here
+                          }()),
+                          (() {
+                            if (mangaInfo.status.isNotEmpty) {
+                              return Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: FractionalOffset.centerLeft,
+                                child: Wrap(
+                                  children: <Widget>[
+                                    Text(
+                                      'Status -',
+                                      style: TextStyle(
+                                        fontFamily: Constant.fontRegular,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(left: 10.0),
+                                      child: Text(
+                                        mangaInfo.status,
+                                        style: TextStyle(
+                                            fontFamily: Constant.fontRegular,
+                                            color: Colors.grey[500]),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          }()),
+                          (() {
+                            if (mangaInfo.lastUpdated.isNotEmpty) {
+                              return Container(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: <Widget>[
+                                    Text(
+                                      'Last Updated -',
+                                      style: TextStyle(
+                                        fontFamily: Constant.fontRegular,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(left: 10.0),
+                                      child: Text(
+                                        mangaInfo.lastUpdated,
+                                        style: TextStyle(
+                                            fontFamily: Constant.fontRegular,
+                                            color: Colors.grey[500]),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          }()),
+                          (() {
+                            if (mangaInfo.alt.isNotEmpty) {
+                              return Container(
+                                padding: const EdgeInsets.all(8.0),
+                                alignment: FractionalOffset.centerLeft,
+                                child: Wrap(
+                                  children: <Widget>[
+                                    Text(
+                                      'Alternate Name(s) -',
+                                      style: TextStyle(
+                                        fontFamily: Constant.fontRegular,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(left: 10.0),
+                                      child: Wrap(
+                                        alignment: WrapAlignment.start,
+                                        children: <Widget>[
+                                          Text(
+                                            mangaInfo.alt,
+                                            style: TextStyle(
+                                                fontFamily:
+                                                    Constant.fontRegular,
+                                                color: Colors.grey[500]),
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          }()),
+                          const SizedBox(
+                            height: 55,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                floatingActionButton: FloatingActionButton.extended(
+                  elevation: 2,
+                  onPressed: () =>
+                      Navigator.of(context).push(_createRoute(mangaInfo)),
+                  label: Text(
+                    "Start reading",
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontFamily: Constant.fontRegular,
+                    ),
+                  ),
+                ),
+              );
+            }());
           }
         },
       ),
     );
   }
+}
+
+Route _createRoute(MangaInfoModule manga) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        ChaptersDetails(manga),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      final tween = Tween(begin: begin, end: end);
+      final curvedAnimation = CurvedAnimation(
+        parent: animation,
+        curve: curve,
+      );
+
+      return SlideTransition(
+        position: tween.animate(curvedAnimation),
+        child: child,
+      );
+    },
+  );
 }

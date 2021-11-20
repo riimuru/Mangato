@@ -6,7 +6,7 @@ class FavoriteChapters {
   final String chapterTitle;
   final String chapterViews;
   final String chapterLink;
-  final bool isFavorite;
+  bool isFavorite;
 
   FavoriteChapters({
     required this.id,
@@ -39,7 +39,10 @@ class FavoriteManga {
   final String mangaLink;
   final String synopsis;
   final String views;
-  final bool isFavorite;
+  String uploadedDate;
+  String author;
+  String rating;
+  bool isFavorite;
 
   FavoriteManga({
     required this.id,
@@ -48,6 +51,9 @@ class FavoriteManga {
     required this.mangaLink,
     required this.synopsis,
     required this.views,
+    this.uploadedDate = "",
+    this.author = "",
+    this.rating = "",
     required this.isFavorite,
   });
 

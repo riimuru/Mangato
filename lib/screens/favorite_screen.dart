@@ -18,6 +18,7 @@ class FavoritesState extends State<Favorites> {
   void initState() {
     super.initState();
     _chapterFuture = getChapters();
+    _mangaFuture = getMangas();
   }
 
   getChapters() async {
@@ -76,17 +77,49 @@ class FavoritesState extends State<Favorites> {
         ),
         body: TabBarView(
           children: [
-            Container(
-              child: const Center(
-                child: Text(
-                  "Manga",
-                  style: TextStyle(
-                    color: Color(0xFFFFFFFF),
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-            ),
+            (() {
+              return FutureBuilder(
+                future: _mangaFuture,
+                builder: (context, AsyncSnapshot<dynamic> snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.none:
+                      return const Center(
+                        child: Text(
+                          "Manga",
+                          style: TextStyle(
+                            color: Color(0xFFFFFFFF),
+                            fontSize: 20,
+                          ),
+                        ),
+                      );
+                    case ConnectionState.waiting:
+                      return Container();
+                    case ConnectionState.active:
+                      return Container();
+                    case ConnectionState.done:
+                      if (snapshot.data != null) {
+                        mangas = List<Map<String, Object>>.from(snapshot.data);
+                        print(mangas);
+                      }
+                      return (() {
+                        if (chapters.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              "Manga",
+                              style: TextStyle(
+                                color: Color(0xFFFFFFFF),
+                                fontSize: 20,
+                              ),
+                            ),
+                          );
+                        } else {
+                          return Container();
+                        }
+                      }());
+                  }
+                },
+              );
+            }()),
             (() {
               return FutureBuilder(
                 future: _chapterFuture,

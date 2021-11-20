@@ -29,7 +29,7 @@ class DatabaseHelper {
         // Run  CREATE TABLE statement on the database.
 
         await db.execute(
-            "CREATE TABLE IF NOT EXISTS manga(id INTEGER PRIMARY KEY, title TEXT, alt TEXT, img TEXT, mangaLink TEXT, synopsis TEXT, views TEXT, rating TEXT)");
+            "CREATE TABLE IF NOT EXISTS manga(id INTEGER PRIMARY KEY, title TEXT,img TEXT, mangaLink TEXT, synopsis TEXT, views TEXT, uploadedDate TEXT, author TEXT ,rating TEXT)");
         await db.execute(
             "CREATE TABLE IF NOT EXISTS chapters(id INTEGER PRIMARY KEY, title TEXT, alt Text, img TEXT, chapterTitle TEXT, chapterViews TEXT, chapterLink TEXT)");
       },

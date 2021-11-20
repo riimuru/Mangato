@@ -1,11 +1,14 @@
 class MangaModule {
   final int index;
   final String title;
-  String chapter = "";
+  String chapter;
   final String img;
-  String synopsis = "";
+  String synopsis;
   final String views;
   final String src;
+  String uploadedDate;
+  String author;
+  String rating;
 
   MangaModule({
     required this.index,
@@ -15,5 +18,8 @@ class MangaModule {
     required this.src,
     this.synopsis = "",
     required this.views,
+    this.uploadedDate = "",
+    this.author = "",
+    this.rating = "",
   });
 }

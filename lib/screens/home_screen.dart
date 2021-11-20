@@ -10,6 +10,8 @@ import '../utils/constants.dart';
 import './search_screen.dart';
 
 class ShonenJumpState extends State<ShonenJump> {
+  ShonenJumpState({Key? key}) : super();
+
   void openSearch() async {
     await showSearch(context: context, delegate: DataSearch());
   }
@@ -132,7 +134,7 @@ class ShonenJumpState extends State<ShonenJump> {
                         shrinkWrap: true,
                         itemCount: snapshot.data.length,
                         itemBuilder: (_, int index) => popularMangaCard(
-                            item: snapshot.data[index], context: context),
+                            manga: snapshot.data[index], context: context),
                       );
                     }
                   },

@@ -21,7 +21,7 @@ class ChaptersDetails extends StatefulWidget {
 class ChaptersDetailsState extends State<ChaptersDetails> {
   final MangaInfoModule manga;
   Future? _chaptersFuture;
-  List<Map<String, Object>> chapters = [];
+  List<Map<String, Object?>> chapters = [];
 
   ChaptersDetailsState(this.manga);
 
@@ -41,7 +41,6 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
     DatabaseHelper.db.deleteChapter(manga.title, chapterTitle);
     chapters.removeWhere((item) =>
         item.containsValue(title) && item.containsValue(chapterTitle));
-    fix();
   }
 
   addChapterToDatabase(String title, String alt, String img,
@@ -111,7 +110,7 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
                       case ConnectionState.done:
                         if (snapshot.data != null) {
                           chapters =
-                              List<Map<String, Object>>.from(snapshot.data);
+                              List<Map<String, Object?>>.from(snapshot.data);
 
                           manga.chapters.forEach((c) {
                             if (chapters
@@ -166,15 +165,11 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
                                           const EdgeInsets.fromLTRB(0, 0, 0, 0),
                                       alignment: Alignment.center,
                                       iconSize: 24,
-                                      icon: (() {
-                                        if (c.isFavorite) {
-                                          return const Icon(Icons.star,
-                                              color: Colors.white);
-                                        } else {
-                                          return const Icon(Icons.star_border,
-                                              color: Colors.white);
-                                        }
-                                      }()),
+                                      icon: (c.isFavorite)
+                                          ? const Icon(Icons.star,
+                                              color: Colors.white)
+                                          : const Icon(Icons.star_border,
+                                              color: Colors.white),
                                       onPressed: () {
                                         setState(() {
                                           if (c.isFavorite) {
