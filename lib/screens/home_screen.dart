@@ -8,16 +8,71 @@ import '../screens/favorite_screen.dart';
 import '../screens/search_screen.dart';
 import '../utils/constants.dart';
 import './search_screen.dart';
+import '../models/home_manga_module.dart';
+import '../src/database_helper.dart';
 
 class ShonenJumpState extends State<ShonenJump> {
   ShonenJumpState({Key? key}) : super();
-
+  Future? recentMangaFuture;
+  Future? popularMangaFuture;
+  // refresh data every 15 minutes
+  static const int minutes = 15;
   void openSearch() async {
     await showSearch(context: context, delegate: DataSearch());
   }
 
   @override
-  Widget build(_) {
+  void initState() {
+    super.initState();
+    recentMangaFuture = getMangas('R', 'recent_manga');
+    popularMangaFuture = getMangas('P', 'popular_manga');
+  }
+
+  // ignore: non_constant_identifier_names
+  getMangas(String TAG, String table) async {
+    if (await getOfflineManga(table) != null) {
+      List<MangaModule> res = await getOfflineManga(table) as List<MangaModule>;
+      if (DateTime.fromMillisecondsSinceEpoch(res[0].timeStamp)
+                  .add(const Duration(minutes: minutes))
+                  .millisecondsSinceEpoch <
+              DateTime.now().millisecondsSinceEpoch &&
+          await DataSource.isConnectedToInternet() == true) {
+        print('reseting data');
+        var ress = (TAG == 'R')
+            ? await DataSource.getLatestManga()
+            : await DataSource.getPopularManga();
+        await DatabaseHelper.db.clearTable(table);
+        for (MangaModule manga in ress) {
+          await DatabaseHelper.db.insertHomeManga(manga, table);
+        }
+        return ress;
+      } else {
+        print("Data is still usable");
+        return res;
+      }
+    } else if (await DataSource.isConnectedToInternet() == true) {
+      var res = (TAG == 'R')
+          ? await DataSource.getLatestManga()
+          : await DataSource.getPopularManga();
+      for (MangaModule manga in res) {
+        await DatabaseHelper.db.insertHomeManga(manga, table);
+      }
+      return res;
+    } else {
+      return null;
+    }
+  }
+
+  getOfflineManga(String table) async {
+    var res = await DatabaseHelper.db.getManga(table);
+    return res;
+  }
+
+  // TODO: swipe to refresh
+  refresh() async {}
+
+  @override
+  Widget build(context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(50, 50, 50, 0.5),
       appBar: AppBar(
@@ -42,7 +97,7 @@ class ShonenJumpState extends State<ShonenJump> {
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute<void>(
-                builder: (_) => Favorites(),
+                builder: (context) => Favorites(),
               ),
             ),
             iconSize: 27.0,
@@ -51,97 +106,91 @@ class ShonenJumpState extends State<ShonenJump> {
           )
         ],
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: <Widget>[
-            Container(
-              margin: const EdgeInsets.fromLTRB(5, 10, 0, 5),
-              width: double.infinity,
-              child: const Text(
-                "Recent Chapters",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: white,
+      body: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (OverscrollIndicatorNotification overscroll) {
+          overscroll.disallowIndicator();
+          return true;
+        },
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: <Widget>[
+              Container(
+                margin: const EdgeInsets.fromLTRB(5, 10, 0, 5),
+                width: double.infinity,
+                child: const Text(
+                  "Recent Chapters",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: white,
+                  ),
+                  textAlign: TextAlign.start,
                 ),
-                textAlign: TextAlign.start,
               ),
-            ),
-            Container(
-              height: 250,
-              margin: const EdgeInsets.fromLTRB(5, 0, 0, 0),
-              child: FutureBuilder(
-                future: DataSource.getLatestManga(),
-                builder: (_, AsyncSnapshot snapshot) {
-                  if (snapshot.data == null) {
-                    return Container(
-                      child: const Center(
-                        child: Text(
-                          "Loading...",
-                          style: TextStyle(
-                            color: white,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    );
-                  } else {
-                    return ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: snapshot.data.length,
-                      itemBuilder: (_, int index) => recentChapterCard(
-                          item: snapshot.data[index], context: context),
-                    );
-                  }
-                },
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.fromLTRB(5, 10, 0, 5),
-              width: double.infinity,
-              child: const Text(
-                "Popular Manga",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: white,
-                ),
-                textAlign: TextAlign.start,
-              ),
-            ),
-            Wrap(
-              // width: double.infinity,
-              children: [
-                FutureBuilder(
-                  future: DataSource.getPopularManga(),
-                  builder: (_, AsyncSnapshot snapshot) {
+              Container(
+                height: 250,
+                margin: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: FutureBuilder(
+                  future: recentMangaFuture,
+                  builder: (context, AsyncSnapshot snapshot) {
                     if (snapshot.data == null) {
                       return Container(
                         child: const Center(
-                          child: Text(
-                            "Loading...",
-                            style: TextStyle(
-                              color: white,
-                              fontSize: 20,
-                            ),
-                          ),
+                          child: CircularProgressIndicator(),
                         ),
                       );
                     } else {
                       return ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
                         itemCount: snapshot.data.length,
-                        itemBuilder: (_, int index) => popularMangaCard(
-                            manga: snapshot.data[index], context: context),
+                        itemBuilder: (context, int index) => recentChapterCard(
+                            item: snapshot.data[index], context: context),
                       );
                     }
                   },
                 ),
-              ],
-            ),
-          ],
+              ),
+              Container(
+                margin: const EdgeInsets.fromLTRB(5, 10, 0, 5),
+                width: double.infinity,
+                child: const Text(
+                  "Popular Manga",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: white,
+                  ),
+                  textAlign: TextAlign.start,
+                ),
+              ),
+              Wrap(
+                // width: double.infinity,
+                children: [
+                  FutureBuilder(
+                    future: popularMangaFuture,
+                    builder: (context, AsyncSnapshot snapshot) {
+                      if (snapshot.data == null) {
+                        return Container(
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      } else {
+                        return ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (context, int index) => popularMangaCard(
+                              manga: snapshot.data[index], context: context),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

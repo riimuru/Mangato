@@ -88,11 +88,12 @@ class DataSearch extends SearchDelegate<String> {
               MaterialPageRoute(
                 builder: (_) => MangaInfo(
                   MangaModule(
-                    index: index,
+                    idx: index,
                     title: searchRes!.mangas[index].title,
                     img: searchRes!.mangas[index].img,
                     src: searchRes!.mangas[index].src,
                     views: searchRes!.mangas[index].views,
+                    timeStamp: DateTime.now().millisecondsSinceEpoch,
                   ),
                 ),
               ),
@@ -147,11 +148,12 @@ class DataSearch extends SearchDelegate<String> {
                         MaterialPageRoute(
                           builder: (_) => MangaInfo(
                             MangaModule(
-                              index: index,
+                              idx: index,
                               title: snapshot.data!.mangas[index].title,
                               img: snapshot.data!.mangas[index].img,
                               src: snapshot.data!.mangas[index].src,
                               views: snapshot.data!.mangas[index].views,
+                              timeStamp: DateTime.now().millisecondsSinceEpoch,
                             ),
                           ),
                         ),

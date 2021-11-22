@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'package:MangaApp/models/bookmarks_module.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import 'dart:io';
 
 import '../models/home_manga_module.dart';
 import '../models/manga_info_module.dart';
@@ -20,7 +18,7 @@ class DataSource {
     List<MangaModule> mangas = [];
     for (var item in jsonData) {
       MangaModule manga = MangaModule(
-        index: item["index"],
+        idx: item["index"],
         title: item["title"],
         chapter: item["chapter"],
         synopsis: item["synopsis"],
@@ -30,6 +28,7 @@ class DataSource {
         author: item["authors"],
         rating: item["rating"],
         uploadedDate: item["uploadedDate"],
+        timeStamp: DateTime.now().millisecondsSinceEpoch,
       );
 
       mangas.add(manga);
@@ -49,7 +48,7 @@ class DataSource {
       List<MangaModule> mangas = [];
       for (var item in jsonData) {
         MangaModule manga = MangaModule(
-          index: item["index"],
+          idx: item["index"],
           title: item["title"],
           chapter: item["chapter"],
           synopsis: item["synopsis"],
@@ -59,6 +58,7 @@ class DataSource {
           author: item["authors"],
           rating: item["rating"],
           uploadedDate: item["uploadedDate"],
+          timeStamp: DateTime.now().millisecondsSinceEpoch,
         );
 
         mangas.add(manga);
@@ -67,13 +67,14 @@ class DataSource {
     } catch (err) {
       List<MangaModule> mangas = [
         MangaModule(
-          index: 1,
+          idx: 1,
           title: "some error occured.",
           chapter: "some error occured.",
           synopsis: "some error occured.",
           src: "some error occured.",
           img: "some error occured.",
           views: "some error occured.",
+          timeStamp: DateTime.now().millisecondsSinceEpoch,
         ),
       ];
       return mangas;
@@ -201,5 +202,17 @@ class DataSource {
     }
 
     return pages;
+  }
+
+  static Future<bool> isConnectedToInternet() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+      return false;
+    } on SocketException catch (_) {
+      return false;
+    }
   }
 }

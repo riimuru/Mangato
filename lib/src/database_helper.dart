@@ -1,9 +1,9 @@
-import 'package:MangaApp/models/manga_info_module.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
 import '../models/bookmarks_module.dart';
+import '../models/home_manga_module.dart';
+import '../models/manga_info_module.dart';
 
 class DatabaseHelper {
   DatabaseHelper._();
@@ -27,7 +27,12 @@ class DatabaseHelper {
       // When  database is first created, create a table to store dogs.
       onCreate: (db, version) async {
         // Run  CREATE TABLE statement on the database.
-
+        await db.execute(
+            "CREATE TABLE IF NOT EXISTS manga_info(id INTEGER PRIMARY KEY, title INTEGER, synopsis TEXT, alt TEXT, status TEXT, lastUpdated TEXT, rating TEXT, totalVoted TEXT , genres TEXT, authors TEXT, img TEXT, views TEXT, src TEXT, chapters TEXT, mangaLink Text)");
+        await db.execute(
+            "CREATE TABLE IF NOT EXISTS recent_manga(idx INTEGER PRIMARY KEY, title TEXT, chapter TEXT, img TEXT, synopsis TEXT, views TEXT, src TEXT , uploadedDate TEXT, author TEXT, rating TEXT, timeStamp INTEGER)");
+        await db.execute(
+            "CREATE TABLE IF NOT EXISTS popular_manga(idx INTEGER PRIMARY KEY, title TEXT, chapter TEXT, img TEXT, synopsis TEXT, views TEXT, src TEXT , uploadedDate TEXT, author TEXT, rating TEXT, timeStamp INTEGER)");
         await db.execute(
             "CREATE TABLE IF NOT EXISTS manga(id INTEGER PRIMARY KEY, title TEXT,img TEXT, mangaLink TEXT, synopsis TEXT, views TEXT, uploadedDate TEXT, author TEXT ,rating TEXT)");
         await db.execute(
@@ -37,6 +42,11 @@ class DatabaseHelper {
       // path  perform database upgrades and downgrades.
       version: 1,
     );
+  }
+
+  clearTable(String table) async {
+    final db = await database;
+    await db!.execute("DELETE FROM $table");
   }
 
   insertManga(FavoriteManga manga) async {
@@ -215,6 +225,44 @@ class DatabaseHelper {
     } else {
       var resMap = res;
       return resMap.isNotEmpty ? resMap : Null;
+    }
+  }
+
+  //TODO: offline feature
+  insertHomeManga(MangaModule manga, String table) async {
+    final db = await database;
+    var res = await db!.insert(
+      table,
+      manga.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    return res;
+  }
+
+  Future<dynamic>? getManga(String table) async {
+    final db = await database;
+    List<MangaModule> mangas = [];
+    var res = await db!.query(table);
+    for (var e in res) {
+      mangas.add(MangaModule(
+        idx: int.parse(e['idx'].toString()),
+        title: e['title'].toString(),
+        img: e['img'].toString(),
+        src: e['src'].toString(),
+        views: e['views'].toString(),
+        synopsis: e['synopsis'].toString(),
+        author: e['author'].toString(),
+        chapter: e['chapter'].toString(),
+        rating: e['rating'].toString(),
+        uploadedDate: e['uploadedDate'].toString(),
+        timeStamp: int.parse(e['timeStamp'].toString()),
+      ));
+    }
+    if (res.isEmpty) {
+      return null;
+    } else {
+      var resMap = res;
+      return resMap.isNotEmpty ? mangas : Null;
     }
   }
 }

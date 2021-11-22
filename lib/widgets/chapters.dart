@@ -80,7 +80,7 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
               "${manga.title} Chapters",
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18.0,
                 fontFamily: Constant.fontRegular,
@@ -91,7 +91,7 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
         ),
       ),
       body: SafeArea(
-        child: Container(
+        child: SizedBox(
           height: MediaQuery.of(context).size.height,
           child: SingleChildScrollView(
             child: Column(
@@ -112,13 +112,13 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
                           chapters =
                               List<Map<String, Object?>>.from(snapshot.data);
 
-                          manga.chapters.forEach((c) {
+                          for (Chapters c in manga.chapters) {
                             if (chapters
                                 .map((e) => e['chapterTitle'])
                                 .contains(c.chapterTitle)) {
                               c.isFavorite = true;
                             }
-                          });
+                          }
                         }
 
                         return Container(

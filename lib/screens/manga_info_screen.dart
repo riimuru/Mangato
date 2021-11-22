@@ -177,16 +177,8 @@ class MangaInfoState extends State<MangaInfo>
         future: DataSource.getMangaInfo(manga.src),
         builder: (_, AsyncSnapshot<MangaInfoModule> snapshot) {
           if (snapshot.data == null) {
-            return Container(
-              child: const Center(
-                child: Text(
-                  "Loading...",
-                  style: TextStyle(
-                    color: white,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
+            return const Center(
+              child: CircularProgressIndicator(),
             );
           } else {
             return (() {
@@ -196,18 +188,18 @@ class MangaInfoState extends State<MangaInfo>
               final thumbHeight = appBarHeight / 1.5;
               var textTheme = Theme.of(context).textTheme;
 
-              int maxLines = 3;
+              const int maxLines = 3;
 
               return Scaffold(
                 backgroundColor: Colors.black12,
                 body: SafeArea(
-                  child: Container(
+                  child: SizedBox(
                     height: MediaQuery.of(context).size.height,
                     child: SingleChildScrollView(
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: <Widget>[
-                          Container(
+                          SizedBox(
                             width: double.infinity,
                             height: 300,
                             child: Stack(
@@ -269,7 +261,7 @@ class MangaInfoState extends State<MangaInfo>
                                         maxLines: 3,
                                         overflow: TextOverflow.ellipsis,
                                         softWrap: true,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontFamily: Constant.fontRegular,
                                         ),
@@ -316,7 +308,7 @@ class MangaInfoState extends State<MangaInfo>
                                                 horizontal: 8.0),
                                         label: Text(
                                           g.genre,
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontFamily: Constant.fontMedium,
                                           ),
@@ -335,7 +327,7 @@ class MangaInfoState extends State<MangaInfo>
                               horizontal: 8.0,
                               vertical: 2.0,
                             ),
-                            child: Text(
+                            child: const Text(
                               "Synopsis: ",
                               style: TextStyle(
                                 fontFamily: Constant.fontRegular,
@@ -360,7 +352,7 @@ class MangaInfoState extends State<MangaInfo>
                                 padding: const EdgeInsets.all(8.0),
                                 child: Row(
                                   children: <Widget>[
-                                    Text(
+                                    const Text(
                                       'Author(s) -',
                                       style: TextStyle(
                                         color: Colors.white,
@@ -368,16 +360,18 @@ class MangaInfoState extends State<MangaInfo>
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(left: 10.0),
-                                      child: Text(
-                                        mangaInfo.authors
-                                            .map<String>((e) => e.authorName)
-                                            .join(', '),
-                                        style: TextStyle(
-                                            fontFamily: Constant.fontRegular,
-                                            color: Colors.grey[500]),
+                                    Expanded(
+                                      child: Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 10.0),
+                                        child: Text(
+                                          mangaInfo.authors
+                                              .map<String>((e) => e.authorName)
+                                              .join(', '),
+                                          style: TextStyle(
+                                              fontFamily: Constant.fontRegular,
+                                              color: Colors.grey[500]),
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -395,7 +389,7 @@ class MangaInfoState extends State<MangaInfo>
                                 alignment: FractionalOffset.centerLeft,
                                 child: Wrap(
                                   children: <Widget>[
-                                    Text(
+                                    const Text(
                                       'Status -',
                                       style: TextStyle(
                                         fontFamily: Constant.fontRegular,
