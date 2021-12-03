@@ -1,11 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../models/bookmarks_module.dart';
 import '../models/home_manga_module.dart';
-import '../models/manga_info_module.dart';
 
 class DatabaseHelper {
+  DatabaseHelper();
   DatabaseHelper._();
   static final DatabaseHelper db = DatabaseHelper._();
   static Database? _database;
@@ -19,12 +20,13 @@ class DatabaseHelper {
   }
 
   _initDb() async {
+    var databasePath = await getDatabasesPath();
     return openDatabase(
       // Set  path to the database. Note: Using the `join` function from the
       // `path`  is best practice to ensure the path is correctly
       // constructed  each platform.
-      join(await getDatabasesPath(), 'manga_database.db'),
-      // When  database is first created, create a table to store dogs.
+      join(databasePath, 'manga_database.db'),
+      // When  database is first created, create a table to store data.
       onCreate: (db, version) async {
         // Run  CREATE TABLE statement on the database.
         await db.execute(
@@ -34,7 +36,7 @@ class DatabaseHelper {
         await db.execute(
             "CREATE TABLE IF NOT EXISTS popular_manga(idx INTEGER PRIMARY KEY, title TEXT, chapter TEXT, img TEXT, synopsis TEXT, views TEXT, src TEXT , uploadedDate TEXT, author TEXT, rating TEXT, timeStamp INTEGER)");
         await db.execute(
-            "CREATE TABLE IF NOT EXISTS manga(id INTEGER PRIMARY KEY, title TEXT,img TEXT, mangaLink TEXT, synopsis TEXT, views TEXT, uploadedDate TEXT, author TEXT ,rating TEXT)");
+            "CREATE TABLE IF NOT EXISTS manga(id INTEGER PRIMARY KEY, title TEXT,chapter TEXT ,img TEXT, src TEXT, synopsis TEXT, views TEXT, uploadedDate TEXT, author TEXT, rating TEXT)");
         await db.execute(
             "CREATE TABLE IF NOT EXISTS chapters(id INTEGER PRIMARY KEY, title TEXT, alt Text, img TEXT, chapterTitle TEXT, chapterViews TEXT, chapterLink TEXT)");
       },
@@ -51,12 +53,12 @@ class DatabaseHelper {
 
   insertManga(FavoriteManga manga) async {
     final db = await database;
-    var res = await db!.insert(
+    await db!.insert(
       'manga',
       manga.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    return res;
+    return true;
   }
 
   insertChapter(FavoriteChapters chapter) async {
@@ -119,7 +121,6 @@ class DatabaseHelper {
       );
       chapters.add(chapter);
     });
-
     return chapters;
   }
 
@@ -153,6 +154,7 @@ class DatabaseHelper {
       where: 'title = ?',
       whereArgs: [title],
     );
+    return false;
   }
 
   deleteChapter(String title, String chapterTitle) async {

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import '../models/manga_info_module.dart';
 import '../utils/constants.dart';
 import './pages.dart';
-import '../src/database_helper.dart';
+import '../services/database_helper.dart';
 import '../models/bookmarks_module.dart';
 
 class ChaptersDetails extends StatefulWidget {
@@ -69,9 +69,7 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white10,
       appBar: AppBar(
-        backgroundColor: Colors.white10,
         title: Hero(
           tag: "${manga.title} Chapters",
           child: Material(
@@ -80,131 +78,105 @@ class ChaptersDetailsState extends State<ChaptersDetails> {
               "${manga.title} Chapters",
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18.0,
-                fontFamily: Constant.fontRegular,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.headline2,
             ),
           ),
         ),
       ),
-      body: SafeArea(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                FutureBuilder(
-                  future: _chaptersFuture,
-                  builder: (context, AsyncSnapshot<dynamic> snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.none:
-                        return Container();
-                      case ConnectionState.waiting:
-                        return Container();
-                      case ConnectionState.active:
-                        return Container();
-                      case ConnectionState.done:
-                        if (snapshot.data != null) {
-                          chapters =
-                              List<Map<String, Object?>>.from(snapshot.data);
+      body: FutureBuilder(
+        future: _chaptersFuture,
+        builder: (context, AsyncSnapshot<dynamic> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+              return Container();
+            case ConnectionState.waiting:
+              return Container();
+            case ConnectionState.active:
+              return Container();
+            case ConnectionState.done:
+              if (snapshot.data != null) {
+                chapters = List<Map<String, Object?>>.from(snapshot.data);
 
-                          for (Chapters c in manga.chapters) {
-                            if (chapters
-                                .map((e) => e['chapterTitle'])
-                                .contains(c.chapterTitle)) {
-                              c.isFavorite = true;
-                            }
-                          }
-                        }
+                for (Chapters c in manga.chapters) {
+                  if (chapters
+                      .map((e) => e['chapterTitle'])
+                      .contains(c.chapterTitle)) {
+                    c.isFavorite = true;
+                  }
+                }
+              }
 
-                        return Container(
-                          padding: const EdgeInsets.only(left: 4.0, right: 4.0),
-                          height: MediaQuery.of(context).size.height,
-                          child: ListView(
-                            physics: const BouncingScrollPhysics(),
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            children: manga.chapters.map((c) {
-                              return ListTile(
-                                title: Text(
-                                  c.chapterTitle,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  c.chapterViews + " Views.",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                isThreeLine: true,
-                                leading: null,
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Text(
-                                      "Uploaded : " + c.uploadedDate,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const Padding(
-                                      padding:
-                                          EdgeInsets.fromLTRB(0, 0, 10.0, 0),
-                                    ),
-                                    IconButton(
-                                      padding:
-                                          const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                      alignment: Alignment.center,
-                                      iconSize: 24,
-                                      icon: (c.isFavorite)
-                                          ? const Icon(Icons.star,
-                                              color: Colors.white)
-                                          : const Icon(Icons.star_border,
-                                              color: Colors.white),
-                                      onPressed: () {
-                                        setState(() {
-                                          if (c.isFavorite) {
-                                            c.isFavorite = false;
-                                            deleteChapterFromDatabase(
-                                                manga.title, c.chapterTitle);
-                                          } else {
-                                            c.isFavorite = true;
-                                            addChapterToDatabase(
-                                                manga.title,
-                                                manga.alt,
-                                                manga.img,
-                                                c.chapterTitle,
-                                                c.chapterViews,
-                                                c.chapterLink);
-                                          }
-                                        });
-                                      },
+              return Container(
+                padding: const EdgeInsets.only(left: 4.0, right: 4.0),
+                height: MediaQuery.of(context).size.height,
+                child: ListView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: manga.chapters.length,
+                    itemBuilder: (context, index) {
+                      Chapters c = manga.chapters[index];
+                      return ListTile(
+                        title: Text(
+                          c.chapterTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.headline2,
+                        ),
+                        subtitle: Text(
+                          c.chapterViews + " Views.",
+                        ),
+                        isThreeLine: true,
+                        leading: null,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              "Uploaded : " + c.uploadedDate,
+                              style: Theme.of(context).textTheme.bodyText2,
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.fromLTRB(0, 0, 10.0, 0),
+                            ),
+                            IconButton(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                              alignment: Alignment.center,
+                              iconSize: 24,
+                              icon: (c.isFavorite)
+                                  ? const Icon(
+                                      Icons.star,
                                     )
-                                  ],
-                                ),
-                                onTap: () => Navigator.of(context)
-                                    .push(_createRoute(c.chapterLink)),
-                              );
-                            }).toList(),
-                          ),
-                        );
-                    }
-                    return Container();
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
+                                  : const Icon(
+                                      Icons.star_border,
+                                    ),
+                              onPressed: () {
+                                setState(() {
+                                  if (c.isFavorite) {
+                                    c.isFavorite = false;
+                                    deleteChapterFromDatabase(
+                                        manga.title, c.chapterTitle);
+                                  } else {
+                                    c.isFavorite = true;
+                                    addChapterToDatabase(
+                                        manga.title,
+                                        manga.alt,
+                                        manga.img,
+                                        c.chapterTitle,
+                                        c.chapterViews,
+                                        c.chapterLink);
+                                  }
+                                });
+                              },
+                            )
+                          ],
+                        ),
+                        onTap: () => Navigator.of(context)
+                            .push(_createRoute(c.chapterLink)),
+                      );
+                    }),
+              );
+          }
+        },
       ),
     );
   }

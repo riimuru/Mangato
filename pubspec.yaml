@@ -36,6 +36,9 @@ dependencies:
  http: ^0.13.4
  flutter_swiper: ^1.1.6
  sqflite: any
+ provider: ^6.0.0
+ shared_preferences: any
+ flutter_native_splash: any
 
 dev_dependencies:
  flutter_test:
@@ -47,6 +50,13 @@ dev_dependencies:
  # package. See that file for information about deactivating specific lint
  # rules and activating additional ones.
  flutter_lints: ^1.0.0
+
+flutter_native_splash:
+ color: "#0D0C1A"
+ image: assets/favico/logo512x512.png
+ color_dark: "#ffffff"
+ android: true
+ ios: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

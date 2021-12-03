@@ -35,10 +35,11 @@ class FavoriteChapters {
 class FavoriteManga {
   final int id;
   final String title;
+  String chapter;
   final String img;
   final String mangaLink;
   final String synopsis;
-  final String views;
+  String views;
   String uploadedDate;
   String author;
   String rating;
@@ -46,6 +47,7 @@ class FavoriteManga {
 
   FavoriteManga({
     required this.id,
+    this.chapter = "",
     required this.title,
     required this.img,
     required this.mangaLink,
@@ -61,10 +63,14 @@ class FavoriteManga {
     return {
       'id': id,
       'title': title,
+      'chapter': chapter,
       'img': img,
-      'mangaLink': mangaLink,
+      'src': mangaLink,
       'synopsis': synopsis,
       'views': views,
+      'uploadedDate': uploadedDate,
+      'author': author,
+      'rating': rating,
     };
   }
 }

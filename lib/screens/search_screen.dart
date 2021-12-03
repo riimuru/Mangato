@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../src/data_source.dart';
+import '../services/data_source.dart';
 import '../screens/manga_info_screen.dart';
 import '../custom/custom_tile.dart';
 import '../models/home_manga_module.dart';
@@ -10,38 +10,6 @@ class DataSearch extends SearchDelegate<String> {
   DataSearch({Key? key}) : super();
 
   SearchModule? searchRes;
-
-  @override
-  ThemeData appBarTheme(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return theme.copyWith(
-      backgroundColor: Colors.black,
-      inputDecorationTheme: const InputDecorationTheme(
-        fillColor: Colors.black,
-        hintStyle: TextStyle(color: Colors.white, fontSize: 20),
-        focusColor: Colors.white,
-        hoverColor: Colors.white,
-      ),
-      textTheme: const TextTheme(
-        subtitle1: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-        ),
-        bodyText1: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-        ),
-        headline1: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-        ),
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF191919),
-      ),
-      scaffoldBackgroundColor: const Color(0xFF191919),
-    );
-  }
 
   // @override
   // ThemeData appBarTheme(BuildContext context) {
@@ -79,7 +47,7 @@ class DataSearch extends SearchDelegate<String> {
         child: ListView.builder(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: searchRes!.mangas.length,
+      itemCount: searchRes?.mangas.length ?? 0,
       itemBuilder: (context, int index) {
         return GestureDetector(
           onTap: () {
@@ -178,15 +146,9 @@ class DataSearch extends SearchDelegate<String> {
         ),
       );
     } else {
-      return Container(
-        child: const Center(
-          child: Text(
-            "",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-            ),
-          ),
+      return const Center(
+        child: Text(
+          "",
         ),
       );
     }

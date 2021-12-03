@@ -1,6 +1,10 @@
+import 'package:MangaApp/models/home_manga_module.dart';
 import 'package:flutter/material.dart';
+
 import '../widgets/pages.dart';
-import '../src/database_helper.dart';
+import '../services/database_helper.dart';
+import '../custom/custom_tile.dart';
+import '../screens/manga_info_screen.dart';
 
 class Favorites extends StatefulWidget {
   @override
@@ -57,67 +61,123 @@ class FavoritesState extends State<Favorites> {
     }
   }
 
+  Future<void> refreshManga() async {
+    final _mangaData = await DatabaseHelper.db.getMangas();
+    setState(() {
+      _mangaFuture = Future.value(_mangaData);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color.fromRGBO(50, 50, 50, 0.5),
         appBar: AppBar(
-          title: const Text("Bookmarks"),
-          backgroundColor: const Color.fromRGBO(50, 50, 50, 0.5),
-          bottom: const TabBar(tabs: [
-            Tab(
-              text: "Manga",
-            ),
-            Tab(
-              text: "Chapters",
-            )
-          ]),
+          title: Text(
+            "Bookmarks",
+            style: Theme.of(context).textTheme.headline3,
+          ),
+          bottom: TabBar(
+            labelColor: Theme.of(context).colorScheme.primary,
+            tabs: const [
+              Tab(
+                text: "Manga",
+              ),
+              Tab(
+                text: "Chapters",
+              )
+            ],
+          ),
         ),
         body: TabBarView(
           children: [
             (() {
-              return FutureBuilder(
-                future: _mangaFuture,
-                builder: (context, AsyncSnapshot<dynamic> snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.none:
-                      return const Center(
-                        child: Text(
-                          "Manga",
-                          style: TextStyle(
-                            color: Color(0xFFFFFFFF),
-                            fontSize: 20,
-                          ),
-                        ),
-                      );
-                    case ConnectionState.waiting:
-                      return Container();
-                    case ConnectionState.active:
-                      return Container();
-                    case ConnectionState.done:
-                      if (snapshot.data != null) {
-                        mangas = List<Map<String, Object>>.from(snapshot.data);
-                        print(mangas);
-                      }
-                      return (() {
-                        if (chapters.isEmpty) {
-                          return const Center(
-                            child: Text(
-                              "Manga",
-                              style: TextStyle(
-                                color: Color(0xFFFFFFFF),
-                                fontSize: 20,
-                              ),
-                            ),
-                          );
-                        } else {
-                          return Container();
+              return SingleChildScrollView(
+                child: FutureBuilder(
+                  future: _mangaFuture,
+                  builder: (context, AsyncSnapshot<dynamic> snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.none:
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      case ConnectionState.waiting:
+                        return Container();
+                      case ConnectionState.active:
+                        return Container();
+                      case ConnectionState.done:
+                        if (snapshot.hasData) {
+                          mangas =
+                              List<Map<String, Object>>.from(snapshot.data);
                         }
-                      }());
-                  }
-                },
+                        return (() {
+                          if (mangas.isEmpty) {
+                            return Center(
+                              child: Text(
+                                "Your Manga list is empty.",
+                                style: Theme.of(context).textTheme.headline1,
+                              ),
+                            );
+                          } else {
+                            return ListView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: mangas.length,
+                              itemBuilder: (context, index) => GestureDetector(
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => MangaInfo(MangaModule(
+                                      idx: 0,
+                                      title: mangas[index]["title"].toString(),
+                                      chapter:
+                                          mangas[index]["chapter"].toString(),
+                                      author:
+                                          mangas[index]["author"].toString(),
+                                      rating:
+                                          mangas[index]["rating"].toString(),
+                                      synopsis:
+                                          mangas[index]["synopsis"].toString(),
+                                      uploadedDate: mangas[index]
+                                              ["uploadedDate"]
+                                          .toString(),
+                                      img: mangas[index]["img"].toString(),
+                                      src: mangas[index]["src"].toString(),
+                                      views: mangas[index]["views"].toString(),
+                                      timeStamp: 0,
+                                    )),
+                                  ),
+                                ),
+                                child: CustomListItemTwo(
+                                  author: mangas[index]["author"].toString(),
+                                  latestChapter:
+                                      mangas[index]["chapter"].toString(),
+                                  publishDate:
+                                      mangas[index]["uploadedDate"].toString(),
+                                  synopsis:
+                                      mangas[index]["synopsis"].toString(),
+                                  thumbnail: Image.network(
+                                    mangas[index]["img"].toString(),
+                                    fit: BoxFit.cover,
+                                  ),
+                                  title: mangas[index]["title"].toString(),
+                                  isFavorite: GestureDetector(
+                                    child: const Icon(
+                                      Icons.close,
+                                    ),
+                                    onTap: () => removeManga(
+                                      mangas[index]["title"].toString(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        }());
+                    }
+                  },
+                ),
               );
             }()),
             (() {
@@ -127,32 +187,23 @@ class FavoritesState extends State<Favorites> {
                   switch (snapshot.connectionState) {
                     case ConnectionState.none:
                       return const Center(
-                        child: Text(
-                          "Chapters",
-                          style: TextStyle(
-                            color: Color(0xFFFFFFFF),
-                            fontSize: 20,
-                          ),
-                        ),
+                        child: CircularProgressIndicator(),
                       );
                     case ConnectionState.waiting:
                       return Container();
                     case ConnectionState.active:
                       return Container();
                     case ConnectionState.done:
-                      if (snapshot.data != null) {
+                      if (snapshot.hasData) {
                         chapters =
                             List<Map<String, Object>>.from(snapshot.data);
                       }
                       return (() {
                         if (chapters.isEmpty) {
-                          return const Center(
+                          return Center(
                             child: Text(
-                              "Chapters",
-                              style: TextStyle(
-                                color: Color(0xFFFFFFFF),
-                                fontSize: 20,
-                              ),
+                              "Your Chapters list is empty.",
+                              style: Theme.of(context).textTheme.headline1,
                             ),
                           );
                         } else {
@@ -166,20 +217,31 @@ class FavoritesState extends State<Favorites> {
                                           _createRoute(
                                               e["chapterLink"].toString())),
                                       child: ListTile(
-                                        title: Text(
-                                          e['chapterTitle'].toString() +
-                                              " From " +
-                                              e['title'].toString(),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                          ),
+                                        title: RichText(
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
+                                          text: TextSpan(
+                                            children: <TextSpan>[
+                                              TextSpan(
+                                                text: e['chapterTitle']
+                                                        .toString() +
+                                                    " From ",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .subtitle1,
+                                              ),
+                                              TextSpan(
+                                                text: e['title'].toString(),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .subtitle2,
+                                              )
+                                            ],
+                                          ),
                                         ),
                                         trailing: GestureDetector(
                                           child: const Icon(
                                             Icons.close,
-                                            color: Colors.white,
                                           ),
                                           onTap: () {
                                             removeChapter(e['title'].toString(),

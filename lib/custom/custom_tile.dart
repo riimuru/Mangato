@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 class _MangaDescription extends StatelessWidget {
-  const _MangaDescription({
+  _MangaDescription({
     Key? key,
     required this.title,
     required this.latestChapter,
     required this.author,
     required this.publishDate,
     required this.synopsis,
+    this.isFavorite,
   }) : super(key: key);
 
   final String title;
@@ -15,6 +16,7 @@ class _MangaDescription extends StatelessWidget {
   final String author;
   final String publishDate;
   final String synopsis;
+  Widget? isFavorite;
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +28,31 @@ class _MangaDescription extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              ListTile(
+                dense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
+                visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+                title: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                trailing: isFavorite,
               ),
+              // Text(
+              //   title,
+              //   maxLines: 2,
+              //   overflow: TextOverflow.ellipsis,
+              //   style: const TextStyle(
+              //     fontWeight: FontWeight.bold,
+              //     color: Colors.white,
+              //   ),
+              // ),
               (() {
                 return (latestChapter.isNotEmpty)
                     ? const Padding(padding: EdgeInsets.only(bottom: 2.0))
@@ -46,10 +64,7 @@ class _MangaDescription extends StatelessWidget {
                         "Latest: $latestChapter",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12.0,
-                          color: Colors.white,
-                        ),
+                        style: Theme.of(context).textTheme.bodyText2,
                       )
                     : Container();
               }()),
@@ -58,10 +73,7 @@ class _MangaDescription extends StatelessWidget {
                 synopsis,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 13.0,
-                  color: Colors.white54,
-                ),
+                style: Theme.of(context).textTheme.bodyText1,
               ),
             ],
           ),
@@ -74,17 +86,11 @@ class _MangaDescription extends StatelessWidget {
             children: <Widget>[
               Text(
                 author,
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.white,
-                ),
+                style: Theme.of(context).textTheme.caption,
               ),
               Text(
                 publishDate,
-                style: const TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.white,
-                ),
+                style: Theme.of(context).textTheme.caption,
               ),
             ],
           ),
@@ -95,15 +101,16 @@ class _MangaDescription extends StatelessWidget {
 }
 
 class CustomListItemTwo extends StatelessWidget {
-  const CustomListItemTwo(
-      {Key? key,
-      required this.thumbnail,
-      required this.title,
-      required this.latestChapter,
-      required this.author,
-      required this.synopsis,
-      required this.publishDate})
-      : super(key: key);
+  CustomListItemTwo({
+    Key? key,
+    required this.thumbnail,
+    required this.title,
+    required this.latestChapter,
+    required this.author,
+    required this.synopsis,
+    required this.publishDate,
+    this.isFavorite,
+  }) : super(key: key);
 
   final Widget thumbnail;
   final String title;
@@ -111,6 +118,7 @@ class CustomListItemTwo extends StatelessWidget {
   final String author;
   final String publishDate;
   final String synopsis;
+  Widget? isFavorite;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -133,6 +141,7 @@ class CustomListItemTwo extends StatelessWidget {
                   author: author,
                   publishDate: publishDate,
                   synopsis: synopsis,
+                  isFavorite: isFavorite,
                 ),
               ),
             )

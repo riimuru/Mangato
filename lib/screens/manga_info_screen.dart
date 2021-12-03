@@ -1,14 +1,16 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 import '../models/home_manga_module.dart';
 import '../models/manga_info_module.dart';
 import '../utils/constants.dart';
-import '../src/data_source.dart';
+import '../services/data_source.dart';
 import '../custom/star_rating.dart';
 import '../widgets/chapters.dart';
 import '../models/bookmarks_module.dart';
-import '../src/database_helper.dart';
+import '../services/database_helper.dart';
 
 class MangaInfo extends StatefulWidget {
   final MangaModule manga;
@@ -22,6 +24,7 @@ class MangaInfo extends StatefulWidget {
 class MangaInfoState extends State<MangaInfo>
     with SingleTickerProviderStateMixin {
   final MangaModule manga;
+
   Future? _mangaFuture;
   Map<String, Object?>? mangaObj;
   FavoriteManga? favManga;
@@ -42,12 +45,23 @@ class MangaInfoState extends State<MangaInfo>
   }
 
   deleteMangaFromDatabase(String title) {
+    favManga = null;
+    favManga = FavoriteManga(
+      id: int.parse(mangaObj?.values.first.toString() ?? "0"),
+      title: mangaObj?.values.elementAt(1).toString() ?? "",
+      img: mangaObj?.values.elementAt(3).toString() ?? "",
+      mangaLink: mangaObj?.values.elementAt(4).toString() ?? "",
+      synopsis: mangaObj?.values.elementAt(5).toString() ?? "",
+      views: mangaObj?.values.elementAt(6).toString() ?? "",
+      isFavorite: true,
+    );
     DatabaseHelper.db.deleteManga(title);
     favManga = null;
   }
 
   addMangaToDatabase(
     String title,
+    String latestChapter,
     String img,
     String mangaLink,
     String synopsis,
@@ -60,6 +74,7 @@ class MangaInfoState extends State<MangaInfo>
     var addManga = FavoriteManga(
       id: timeStmap,
       title: title,
+      chapter: latestChapter,
       img: img,
       mangaLink: mangaLink,
       synopsis: synopsis,
@@ -70,18 +85,7 @@ class MangaInfoState extends State<MangaInfo>
       isFavorite: true,
     );
     DatabaseHelper.db.insertManga(addManga);
-    favManga = FavoriteManga(
-      id: timeStmap,
-      title: title,
-      img: img,
-      mangaLink: mangaLink,
-      synopsis: synopsis,
-      views: views,
-      author: authors,
-      rating: rating,
-      uploadedDate: uploadedDate,
-      isFavorite: true,
-    );
+    favManga = addManga;
   }
 
   @override
@@ -93,9 +97,7 @@ class MangaInfoState extends State<MangaInfo>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(50, 50, 50, 0.5),
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(50, 50, 50, 0.5),
         title: Hero(
           tag: manga.title,
           child: Material(
@@ -104,12 +106,7 @@ class MangaInfoState extends State<MangaInfo>
               manga.title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18.0,
-                fontFamily: Constant.fontRegular,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.headline2,
             ),
           ),
         ),
@@ -125,8 +122,9 @@ class MangaInfoState extends State<MangaInfo>
                   case ConnectionState.active:
                     return Container();
                   case ConnectionState.done:
-                    if (snapshot.data != null) {
+                    if (snapshot.hasData) {
                       mangaObj = Map<String, Object?>.from(snapshot.data?[0]);
+
                       favManga = FavoriteManga(
                         id: int.parse(mangaObj?.values.first.toString() ?? "0"),
                         title: mangaObj?.values.elementAt(1).toString() ?? "",
@@ -143,28 +141,32 @@ class MangaInfoState extends State<MangaInfo>
                       icon: (favManga == null)
                           ? const Icon(
                               Icons.bookmark_add_outlined,
-                              color: white,
                             )
                           : const Icon(
                               Icons.bookmark_added_sharp,
-                              color: white,
                             ),
-                      onPressed: () => setState(() {
-                        if (favManga == null) {
-                          addMangaToDatabase(
-                            manga.title,
-                            manga.img,
-                            manga.src,
-                            manga.synopsis,
-                            manga.views,
-                            manga.uploadedDate,
-                            manga.author,
-                            manga.rating,
-                          );
-                        } else {
-                          deleteMangaFromDatabase(manga.title);
-                        }
-                      }),
+                      onPressed: () {
+                        setState(() {
+                          if (favManga == null) {
+                            addMangaToDatabase(
+                              manga.title,
+                              manga.chapter,
+                              manga.img,
+                              manga.src,
+                              manga.synopsis,
+                              manga.views,
+                              manga.uploadedDate,
+                              manga.author,
+                              manga.rating,
+                            );
+                            print("Added");
+                          } else {
+                            print("delete");
+
+                            deleteMangaFromDatabase(manga.title);
+                          }
+                        });
+                      },
                       iconSize: 27.0,
                       enableFeedback: true,
                       splashRadius: 15.0,
@@ -191,7 +193,7 @@ class MangaInfoState extends State<MangaInfo>
               const int maxLines = 3;
 
               return Scaffold(
-                backgroundColor: Colors.black12,
+                backgroundColor: Theme.of(context).backgroundColor,
                 body: SafeArea(
                   child: SizedBox(
                     height: MediaQuery.of(context).size.height,
@@ -247,13 +249,12 @@ class MangaInfoState extends State<MangaInfo>
                                 ),
                                 Positioned(
                                   top: 200,
-                                  left: 155,
+                                  left: 200,
                                   width:
                                       MediaQuery.of(context).size.width / 1.75,
                                   child: ListTile(
                                     leading: const Icon(
                                       Icons.remove_red_eye,
-                                      color: Colors.white,
                                     ),
                                     title: Transform.translate(
                                       child: Text(
@@ -261,32 +262,33 @@ class MangaInfoState extends State<MangaInfo>
                                         maxLines: 3,
                                         overflow: TextOverflow.ellipsis,
                                         softWrap: true,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontFamily: Constant.fontRegular,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headline4,
                                       ),
                                       offset: const Offset(-25, 0),
                                     ),
                                   ),
                                 ),
                                 Positioned(
-                                    top: 240,
-                                    left: 162,
-                                    width: MediaQuery.of(context).size.width /
-                                        1.75,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: mangaInfo.rating != ''
-                                          ? StarRating(
-                                              color: Theme.of(context)
-                                                  .primaryColor,
-                                              rating: double.parse(
-                                                  mangaInfo.rating),
-                                              starCount: 5,
-                                            )
-                                          : Container(),
-                                    )),
+                                  top: 240,
+                                  left: 210,
+                                  width:
+                                      MediaQuery.of(context).size.width / 1.75,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: mangaInfo.rating != ''
+                                        ? StarRating(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .secondary,
+                                            rating:
+                                                double.parse(mangaInfo.rating),
+                                            starCount: 5,
+                                          )
+                                        : Container(),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -308,13 +310,13 @@ class MangaInfoState extends State<MangaInfo>
                                                 horizontal: 8.0),
                                         label: Text(
                                           g.genre,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontFamily: Constant.fontMedium,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headline6,
                                         ),
-                                        backgroundColor:
-                                            Theme.of(context).primaryColor,
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
                                       ),
                                     ),
                                   )
@@ -327,13 +329,9 @@ class MangaInfoState extends State<MangaInfo>
                               horizontal: 8.0,
                               vertical: 2.0,
                             ),
-                            child: const Text(
+                            child: Text(
                               "Synopsis: ",
-                              style: TextStyle(
-                                fontFamily: Constant.fontRegular,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                              style: Theme.of(context).textTheme.headline5,
                             ),
                           ),
                           Padding(
@@ -352,13 +350,10 @@ class MangaInfoState extends State<MangaInfo>
                                 padding: const EdgeInsets.all(8.0),
                                 child: Row(
                                   children: <Widget>[
-                                    const Text(
+                                    Text(
                                       'Author(s) -',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: Constant.fontRegular,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style:
+                                          Theme.of(context).textTheme.headline5,
                                     ),
                                     Expanded(
                                       child: Padding(
@@ -389,13 +384,10 @@ class MangaInfoState extends State<MangaInfo>
                                 alignment: FractionalOffset.centerLeft,
                                 child: Wrap(
                                   children: <Widget>[
-                                    const Text(
+                                    Text(
                                       'Status -',
-                                      style: TextStyle(
-                                        fontFamily: Constant.fontRegular,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                                      style:
+                                          Theme.of(context).textTheme.headline5,
                                     ),
                                     Padding(
                                       padding:
@@ -422,11 +414,8 @@ class MangaInfoState extends State<MangaInfo>
                                   children: <Widget>[
                                     Text(
                                       'Last Updated -',
-                                      style: TextStyle(
-                                        fontFamily: Constant.fontRegular,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                                      style:
+                                          Theme.of(context).textTheme.headline5,
                                     ),
                                     Padding(
                                       padding:
@@ -454,11 +443,8 @@ class MangaInfoState extends State<MangaInfo>
                                   children: <Widget>[
                                     Text(
                                       'Alternate Name(s) -',
-                                      style: TextStyle(
-                                        fontFamily: Constant.fontRegular,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                                      style:
+                                          Theme.of(context).textTheme.headline5,
                                     ),
                                     Padding(
                                       padding:
@@ -484,7 +470,7 @@ class MangaInfoState extends State<MangaInfo>
                             }
                           }()),
                           const SizedBox(
-                            height: 55,
+                            height: 57,
                           )
                         ],
                       ),
@@ -495,14 +481,9 @@ class MangaInfoState extends State<MangaInfo>
                   elevation: 2,
                   onPressed: () =>
                       Navigator.of(context).push(_createRoute(mangaInfo)),
-                  label: Text(
-                    "Start reading",
-                    textAlign: TextAlign.end,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontFamily: Constant.fontRegular,
-                    ),
-                  ),
+                  label: Text("Start reading",
+                      textAlign: TextAlign.end,
+                      style: Theme.of(context).textTheme.button),
                 ),
               );
             }());

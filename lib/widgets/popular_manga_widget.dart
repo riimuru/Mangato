@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/home_manga_module.dart';
 import '../screens/manga_info_screen.dart';
-import '../src/data_source.dart';
+import '../services/data_source.dart';
 import '../custom/custom_tile.dart';
 import '../utils/constants.dart';
 

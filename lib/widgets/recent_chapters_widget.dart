@@ -4,7 +4,7 @@ import '../models/home_manga_module.dart';
 import '../screens/manga_info_screen.dart';
 
 Widget recentChapterCard({
-  required MangaModule item,
+  required MangaModule manga,
   required BuildContext context,
 }) =>
     GestureDetector(
@@ -12,7 +12,7 @@ Widget recentChapterCard({
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => MangaInfo(item),
+            builder: (_) => MangaInfo(manga),
           ),
         );
       },
@@ -25,7 +25,7 @@ Widget recentChapterCard({
           image: DecorationImage(
             fit: BoxFit.cover,
             image: NetworkImage(
-              item.img,
+              manga.img,
             ),
           ),
         ),
@@ -36,7 +36,7 @@ Widget recentChapterCard({
               child: ListTile(
                 minLeadingWidth: 0,
                 title: Text(
-                  item.title,
+                  manga.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -45,7 +45,7 @@ Widget recentChapterCard({
                   ),
                 ),
                 subtitle: Text(
-                  item.chapter,
+                  manga.chapter,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

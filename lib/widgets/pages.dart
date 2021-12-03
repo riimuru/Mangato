@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 
 import '../models/manga_info_module.dart';
-import '../src/data_source.dart';
+import '../services/data_source.dart';
 import '../utils/constants.dart';
 
 class Pages extends StatelessWidget {
@@ -14,11 +14,9 @@ class Pages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       body: Stack(children: <Widget>[
-        Container(
-          color: Colors.black, // Your screen background color
-        ),
+        Container(// Your screen background color
+            ),
         Expanded(
           child: FutureBuilder(
             future: DataSource.getChapterPages(chapterLink),
@@ -71,13 +69,11 @@ class Pages extends StatelessWidget {
           left: 0.0,
           right: 0.0,
           child: AppBar(
-            title: Text(''), // You can add title here
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              icon: const Icon(Icons.arrow_back_ios),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            backgroundColor:
-                Colors.blue.withOpacity(0), //You can make this transparent
+            backgroundColor: Colors.blue.withOpacity(0), //transparent
             elevation: 0.0, //No shadow
           ),
         ),
