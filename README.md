@@ -34,6 +34,9 @@
 
 Mangato parses website data and filters the necessary information, Therefore it removes advertisements for a better user experience. You do not need to create an account to use the app.
 
+## API Refrence
+[API Repo](https://github.com/riimuru/Mangato-api) This api is being used in this project.
+
 ## Features
 
 - Search Manga
@@ -64,7 +67,3 @@ Mangato parses website data and filters the necessary information, Therefore it 
 Your suggestions, translations, design modifications, code cleaning, or major code changes, as well as any other help, are always welcome. The greater the contribution, the better.
 
 [Pull requests](https://github.com/riimuru/Mangato/pulls) will be reviewed
-
-## P.S
-
-API repo TBA
