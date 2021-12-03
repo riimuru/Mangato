@@ -93,34 +93,33 @@ class FavoritesState extends State<Favorites> {
         body: TabBarView(
           children: [
             (() {
-              return SingleChildScrollView(
-                child: FutureBuilder(
-                  future: _mangaFuture,
-                  builder: (context, AsyncSnapshot<dynamic> snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.none:
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      case ConnectionState.waiting:
-                        return Container();
-                      case ConnectionState.active:
-                        return Container();
-                      case ConnectionState.done:
-                        if (snapshot.hasData) {
-                          mangas =
-                              List<Map<String, Object>>.from(snapshot.data);
-                        }
-                        return (() {
-                          if (mangas.isEmpty) {
-                            return Center(
-                              child: Text(
-                                "Your Manga list is empty.",
-                                style: Theme.of(context).textTheme.headline1,
-                              ),
-                            );
-                          } else {
-                            return ListView.builder(
+              return FutureBuilder(
+                future: _mangaFuture,
+                builder: (context, AsyncSnapshot<dynamic> snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.none:
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    case ConnectionState.waiting:
+                      return Container();
+                    case ConnectionState.active:
+                      return Container();
+                    case ConnectionState.done:
+                      if (snapshot.hasData) {
+                        mangas = List<Map<String, Object>>.from(snapshot.data);
+                      }
+                      return (() {
+                        if (mangas.isEmpty) {
+                          return Center(
+                            child: Text(
+                              "Your Manga list is empty.",
+                              style: Theme.of(context).textTheme.headline1,
+                            ),
+                          );
+                        } else {
+                          return SingleChildScrollView(
+                            child: ListView.builder(
                               physics: const NeverScrollableScrollPhysics(),
                               shrinkWrap: true,
                               itemCount: mangas.length,
@@ -172,12 +171,12 @@ class FavoritesState extends State<Favorites> {
                                   ),
                                 ),
                               ),
-                            );
-                          }
-                        }());
-                    }
-                  },
-                ),
+                            ),
+                          );
+                        }
+                      }());
+                  }
+                },
               );
             }()),
             (() {

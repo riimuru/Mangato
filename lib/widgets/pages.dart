@@ -6,10 +6,8 @@ import '../services/data_source.dart';
 import '../utils/constants.dart';
 
 class Pages extends StatelessWidget {
-  String chapterLink;
   Pages(this.chapterLink);
-
-  void check() => print(this.chapterLink);
+  String chapterLink;
 
   @override
   Widget build(BuildContext context) {
@@ -17,52 +15,48 @@ class Pages extends StatelessWidget {
       body: Stack(children: <Widget>[
         Container(// Your screen background color
             ),
-        Expanded(
-          child: FutureBuilder(
-            future: DataSource.getChapterPages(chapterLink),
-            builder: (context, AsyncSnapshot snapshot) {
-              if (snapshot.data == null) {
-                return Container(
-                  child: const Center(
-                    child: Text(
-                      "Loading...",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
+        FutureBuilder(
+          future: DataSource.getChapterPages(chapterLink),
+          builder: (context, AsyncSnapshot snapshot) {
+            if (snapshot.data == null) {
+              return const Center(
+                child: Text(
+                  "Loading...",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
                   ),
-                );
-              } else {
-                return Swiper(
-                  itemCount: snapshot.data.length,
-                  loop: false,
-                  itemHeight: 300,
-                  layout: SwiperLayout.DEFAULT,
-                  itemBuilder: (context, index) {
-                    return Image.network(
-                      snapshot.data[index].img,
-                      fit: BoxFit.contain,
-                      headers: const {"Referer": Constant.referer},
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) {
-                          return child;
-                        }
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                );
-              }
-            },
-          ),
+                ),
+              );
+            } else {
+              return Swiper(
+                itemCount: snapshot.data.length,
+                loop: false,
+                itemHeight: 300,
+                layout: SwiperLayout.DEFAULT,
+                itemBuilder: (context, index) {
+                  return Image.network(
+                    snapshot.data[index].img,
+                    fit: BoxFit.contain,
+                    headers: const {"Referer": Constant.referer},
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      }
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            }
+          },
         ),
         Positioned(
           top: 0.0,

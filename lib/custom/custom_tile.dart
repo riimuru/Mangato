@@ -87,6 +87,7 @@ class _MangaDescription extends StatelessWidget {
               Text(
                 author,
                 style: Theme.of(context).textTheme.caption,
+                maxLines: 1,
               ),
               Text(
                 publishDate,
