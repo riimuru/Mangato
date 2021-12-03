@@ -1,10 +1,10 @@
-import 'package:MangaApp/models/home_manga_module.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/pages.dart';
 import '../services/database_helper.dart';
 import '../custom/custom_tile.dart';
 import '../screens/manga_info_screen.dart';
+import '../models/home_manga_module.dart';
 
 class Favorites extends StatefulWidget {
   @override

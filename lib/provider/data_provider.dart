@@ -1,6 +1,6 @@
-import 'package:MangaApp/models/bookmarks_module.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import '../models/bookmarks_module.dart';
 
 import '../services/database_helper.dart';
 
