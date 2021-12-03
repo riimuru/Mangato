@@ -64,3 +64,7 @@ Mangato parses website data and filters the necessary information, Therefore it 
 Your suggestions, translations, design modifications, code cleaning, or major code changes, as well as any other help, are always welcome. The greater the contribution, the better.
 
 [Pull requests](https://github.com/riimuru/Mangato/pulls) will be reviewed
+
+## P.S
+
+API repo TBA
