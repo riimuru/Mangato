@@ -46,6 +46,8 @@ Mangato parses website data and filters the necessary information, Therefore it 
 
 - Ability to zoom in when reading manga.
 - Online syncing of reading progress.
+- Ability to download chapters.
+- ...and many more.
 
 ## Technologies used
 
