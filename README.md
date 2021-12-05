@@ -34,7 +34,7 @@
 
 Mangato parses website data and filters the necessary information, Therefore it removes advertisements for a better user experience. You do not need to create an account to use the app.
 
-## API Refrence
+## API Reference
 [API Repo](https://github.com/riimuru/Mangato-api) This api is being used in this project.
 
 ## Features
